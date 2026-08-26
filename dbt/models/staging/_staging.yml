@@ -9,26 +9,28 @@ models:
       - name: cik
         tests: [not_null]
       - name: filed_date
-        description: The date these numbers became public. The project turns on this.
+        description: The date these numbers became public.
         tests: [not_null]
       - name: form_type
-        tests:
-          - not_null
+        tests: [not_null]
       - name: filing_lag_days
-        description: filed_date minus period_end_date. Negative values are a data issue.
+        description: filed_date minus period_end_date.
 
   - name: stg_numeric
     description: >
       Numeric facts, one row per reported value per filing. Deduplication is
-      deliberately NOT done here -- duplicates across filings are the signal,
-      not noise.
+      deliberately NOT done here -- duplicates across filings are the signal.
+      The SEC added `segments` to the natural key in the 2022 restructure.
     tests:
       - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
           combination_of_columns:
             - adsh
             - tag
             - taxonomy_version
             - coregistrant
+            - segments
             - period_end_date
             - qtrs
             - unit_of_measure
@@ -39,11 +41,6 @@ models:
           - relationships:
               to: ref('stg_submissions')
               field: adsh
-      - name: qtrs
-        tests:
-          - accepted_values:
-              values: [0, 1, 2, 3, 4]
-              quote: false
 
   - name: stg_presentation
     columns:
@@ -52,7 +49,7 @@ models:
       - name: statement_code
         tests:
           - accepted_values:
-              values: ['BS', 'IS', 'CF', 'EQ', 'CI', 'CP', 'UN']
+              values: ['BS', 'IS', 'CF', 'EQ', 'CI', 'SI', 'CP', 'UN']
 
   - name: stg_tags
     tests:

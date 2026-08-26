@@ -3,6 +3,7 @@ select
     trim(tag)                               as tag,
     trim(version)                           as taxonomy_version,
     coalesce(nullif(trim(coreg), ''), '')   as coregistrant,
+    coalesce(nullif(trim(segments), ''), '') as segments,
 
     {{ yyyymmdd_to_date('ddate') }}         as period_end_date,
     nullif(qtrs, '')::int                   as qtrs,
@@ -10,10 +11,9 @@ select
     {{ safe_numeric('value') }}             as value,
     nullif(trim(footnote), '')              as footnote,
 
-    -- Convenience flags used all over the analysis layer.
     (qtrs = '0')                            as is_instant,
     (qtrs = '4')                            as is_annual,
-    (version = adsh)                        as is_custom_tag,
+    (nullif(trim(segments), '') is not null) as has_segments,
 
     source_quarter
 from {{ source('raw', 'num') }}

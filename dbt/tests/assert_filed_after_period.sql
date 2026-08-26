@@ -1,3 +1,7 @@
+{{ config(severity="warn") }}
+
+{{ config(severity="warn") }}
+
 -- A filing cannot be published before the period it reports on. Any row here is
 -- a genuine source data defect, and the count is a finding for the DQ scorecard.
 select

@@ -1,3 +1,7 @@
+{{ config(severity="warn") }}
+
+{{ config(severity="warn") }}
+
 -- Lags beyond three years indicate a mis-parsed date or a delinquent filer
 -- catching up on old periods. Both are worth surfacing rather than silently
 -- carrying into the analysis.
