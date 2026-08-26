@@ -1,18 +1,9 @@
-"""
-Load SEC quarterly ZIPs into a `raw` schema as untyped TEXT columns.
+"""Load SEC quarterly ZIPs into a raw schema as untyped TEXT columns.
 
-Three things this handles that a naive loader does not:
-
-1. The files are TAB delimited, not comma.
-2. They contain stray unescaped double quotes in text fields (company names,
-   footnotes). Standard CSV parsing chokes on these. Setting the quote character
-   to a byte that never appears in the data effectively disables quote handling,
-   which is correct here -- these files do not use quoting at all.
-3. Each table gets a `source_quarter` column so every row traces back to the ZIP
-   it came from. Needed for incremental loads and for debugging.
-
-Columns are read from each file's own header rather than hardcoded, because the
-SEC has added fields over the years and older quarters have fewer.
+Handles tab delimiters, unquoted text containing stray double quotes, source
+schema drift across quarters, and rows whose free-text fields contain embedded
+tabs. That last case cannot be repaired reliably, so those rows are rejected and
+counted in raw.load_rejects.
 """
 
 import os
@@ -21,19 +12,15 @@ import zipfile
 from pathlib import Path
 
 import psycopg
+import psycopg.sql
 from dotenv import load_dotenv
 
 load_dotenv()
 
 RAW_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
+FLUSH_EVERY = 50_000
 
-# file inside the zip -> raw table name
-MEMBERS = {
-    "sub.txt": "sub",
-    "num.txt": "num",
-    "pre.txt": "pre",
-    "tag.txt": "tag",
-}
+MEMBERS = {"sub.txt": "sub", "num.txt": "num", "pre.txt": "pre", "tag.txt": "tag"}
 
 
 def conn_string() -> str:
@@ -46,22 +33,37 @@ def conn_string() -> str:
     )
 
 
-def load_member(cur, zf, member: str, table: str, quarter: str) -> int:
+def existing_columns(cur, table):
+    cur.execute(
+        "select column_name from information_schema.columns "
+        "where table_schema = 'raw' and table_name = %s",
+        (table,),
+    )
+    return {r[0] for r in cur.fetchall()}
+
+
+def reconcile_schema(cur, table, cols):
+    present = existing_columns(cur, table)
+    if not present:
+        col_ddl = ", ".join(f'"{c}" text' for c in cols)
+        cur.execute(f"create table raw.{table} ({col_ddl}, source_quarter text)")
+        return []
+    added = [c for c in cols if c not in present]
+    for col in added:
+        cur.execute(f'alter table raw.{table} add column "{col}" text')
+    return added
+
+
+def load_member(cur, zf, member, table, quarter):
     with zf.open(member) as fh:
         header = fh.readline().decode("utf-8", errors="replace").rstrip("\r\n")
         cols = header.split("\t")
+        ncols = len(cols)
 
-        col_ddl = ", ".join(f'"{c}" text' for c in cols)
-        cur.execute(
-            f"create table if not exists raw.{table} "
-            f"({col_ddl}, source_quarter text)"
-        )
-
-        # The default supplies source_quarter for every row this COPY inserts,
-        # so the column never appears in the column list and needs no UPDATE.
+        added = reconcile_schema(cur, table, cols)
         cur.execute(
             f"alter table raw.{table} "
-            f"alter column source_quarter set default '{quarter}'"
+            f"alter column source_quarter set default {psycopg.sql.Literal(quarter).as_string(cur)}"
         )
 
         col_list = ", ".join(f'"{c}"' for c in cols)
@@ -71,12 +73,32 @@ def load_member(cur, zf, member: str, table: str, quarter: str) -> int:
         )
 
         rows = 0
+        rejected = 0
+        buf = bytearray()
         with cur.copy(copy_sql) as copy:
-            while chunk := fh.read(1 << 22):
-                copy.write(chunk)
-                rows += chunk.count(b"\n")
+            for raw_line in fh:
+                line = raw_line.rstrip(b"\r\n")
+                if not line:
+                    continue
+                if line.count(b"\t") != ncols - 1:
+                    rejected += 1
+                    continue
+                buf += line + b"\n"
+                rows += 1
+                if rows % FLUSH_EVERY == 0:
+                    copy.write(bytes(buf))
+                    buf.clear()
+            if buf:
+                copy.write(bytes(buf))
 
-    return rows
+    if rejected:
+        cur.execute(
+            "insert into raw.load_rejects "
+            "(source_quarter, source_file, expected_columns, rows_rejected) "
+            "values (%s, %s, %s, %s)",
+            (quarter, member, ncols, rejected),
+        )
+    return rows, rejected, added
 
 
 def main() -> int:
@@ -85,14 +107,22 @@ def main() -> int:
         print(f"No ZIPs in {RAW_DIR}. Run `make fetch` first.", file=sys.stderr)
         return 1
 
+    print(f"{len(zips)} quarters to load: {zips[0].stem} .. {zips[-1].stem}\n")
+
     with psycopg.connect(conn_string()) as conn:
         with conn.cursor() as cur:
             cur.execute("create schema if not exists raw")
-            # Full reload each run. Incremental arrives in Stage 2.
             for table in MEMBERS.values():
                 cur.execute(f"drop table if exists raw.{table}")
+            cur.execute("drop table if exists raw.load_rejects")
+            cur.execute(
+                "create table raw.load_rejects ("
+                "source_quarter text, source_file text, "
+                "expected_columns int, rows_rejected bigint)"
+            )
             conn.commit()
 
+            total_rejected = 0
             for path in zips:
                 quarter = path.stem
                 with zipfile.ZipFile(path) as zf:
@@ -102,14 +132,24 @@ def main() -> int:
                         if actual is None:
                             print(f"  {quarter}: {member} missing", file=sys.stderr)
                             continue
-                        rows = load_member(cur, zf, actual, table, quarter)
-                        print(f"  {quarter} {table:<4} {rows:>11,}")
+                        rows, rejected, added = load_member(
+                            cur, zf, actual, table, quarter
+                        )
+                        total_rejected += rejected
+                        notes = []
+                        if rejected:
+                            notes.append(f"{rejected:,} rejected")
+                        if added:
+                            notes.append(f"+cols {', '.join(added)}")
+                        suffix = f"   [{'; '.join(notes)}]" if notes else ""
+                        print(f"  {quarter} {table:<4} {rows:>11,}{suffix}")
                 conn.commit()
 
             print()
             for table in MEMBERS.values():
                 cur.execute(f"select count(*) from raw.{table}")
                 print(f"raw.{table:<5} {cur.fetchone()[0]:>13,} rows")
+            print(f"\n{total_rejected:,} rows rejected for malformed field counts")
         conn.commit()
     return 0
 
