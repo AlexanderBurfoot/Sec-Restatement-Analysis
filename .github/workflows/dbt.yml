@@ -22,7 +22,6 @@ jobs:
       POSTGRES_USER: sec
       POSTGRES_PASSWORD: sec
       POSTGRES_DB: sec
-      DBT_PROFILES_DIR: ./dbt
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
