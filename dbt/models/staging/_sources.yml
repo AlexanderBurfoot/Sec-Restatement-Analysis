@@ -29,3 +29,9 @@ sources:
           Tag dictionary. `custom` = 1 means a company-specific extension
           rather than a standard US-GAAP tag -- the comparability problem.
           `crdr` gives the natural credit/debit balance, needed for sign checks.
+      - name: load_rejects
+        description: >
+          Rows discarded during ingestion because a free-text field contained a
+          literal tab, producing more fields than the header declares. Such a
+          row cannot be repaired reliably -- you cannot know which field the
+          stray tab split -- so it is rejected and counted.

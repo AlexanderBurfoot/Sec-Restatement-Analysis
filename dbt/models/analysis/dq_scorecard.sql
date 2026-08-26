@@ -1,13 +1,11 @@
 {{ config(materialized='table') }}
 
 /*
-  The Stage 1 headline deliverable: one row per data quality rule, with the
-  number of rows affected and the rate. This is the table that goes in the
-  README, and it is the artefact that maps most directly onto data quality
-  and controls roles.
+  One row per data quality rule, with rows affected and rate. Every rule here
+  was found by querying the data, not assumed in advance.
 
-  Add a rule by adding a CTE and a union branch. Keep severity honest --
-  "high" should mean a number would be wrong, not merely untidy.
+  Severity is honest: "high" means a downstream number would be wrong, not
+  merely that the data is untidy.
 */
 
 with total_facts as (
@@ -19,55 +17,72 @@ total_filings as (
 
 null_values as (
     select
-        'Null numeric value' as rule_name,
-        'completeness'       as dimension,
-        'medium'             as severity,
-        count(*)             as rows_affected,
+        'Null numeric value'    as rule_name,
+        'completeness'          as dimension,
+        'medium'                as severity,
+        count(*)                as rows_affected,
         (select n from total_facts) as rows_checked
     from {{ ref('stg_numeric') }}
     where value is null
 ),
 
-unparseable_dates as (
+filed_before_period as (
     select
-        'Unparseable filing date', 'validity', 'high',
+        'Filed before the period it reports', 'validity', 'high',
         count(*), (select n from total_filings)
     from {{ ref('stg_submissions') }}
-    where filed_date is null
+    where filed_date < period_end_date
 ),
 
-negative_lag as (
+implausible_lag as (
     select
-        'Filed before period end', 'validity', 'high',
+        'Filing lag exceeds three years', 'timeliness', 'medium',
         count(*), (select n from total_filings)
     from {{ ref('stg_submissions') }}
-    where filing_lag_days < 0
+    where filing_lag_days > 1095
 ),
 
-custom_tags as (
+implausible_duration as (
     select
-        'Company-specific custom tag', 'comparability', 'medium',
+        'Reporting duration exceeds ten years', 'validity', 'high',
         count(*), (select n from total_facts)
     from {{ ref('stg_numeric') }}
-    where is_custom_tag
+    where qtrs > 40 or qtrs < 0
 ),
 
-orphan_facts as (
+conflicting_duplicates as (
+    -- The same fact reported twice within ONE filing, with different values.
+    -- A consumer picking arbitrarily gets a different answer by row order.
     select
-        'Numeric fact with no filing', 'integrity', 'high',
-        count(*), (select n from total_facts)
-    from {{ ref('stg_numeric') }} n
-    where not exists (
-        select 1 from {{ ref('stg_submissions') }} s where s.adsh = n.adsh
-    )
+        'Duplicate key with conflicting values', 'consistency', 'high',
+        coalesce(sum(occurrences), 0), (select n from total_facts)
+    from (
+        select count(*) as occurrences
+        from {{ ref('stg_numeric') }}
+        group by adsh, tag, taxonomy_version, coregistrant,
+                 segments, period_end_date, qtrs, unit_of_measure
+        having count(*) > 1 and count(distinct value) > 1
+    ) d
+),
+
+rejected_at_load as (
+    -- Rows discarded during ingestion: free-text fields containing literal tab
+    -- characters produce more fields than the header declares, and the row
+    -- cannot be repaired reliably.
+    select
+        'Rejected at load: embedded delimiter', 'validity', 'medium',
+        coalesce(sum(rows_rejected), 0),
+        (select n from total_facts) + coalesce(sum(rows_rejected), 0)
+    from {{ source('raw', 'load_rejects') }}
 ),
 
 unioned as (
     select * from null_values
-    union all select * from unparseable_dates
-    union all select * from negative_lag
-    union all select * from custom_tags
-    union all select * from orphan_facts
+    union all select * from filed_before_period
+    union all select * from implausible_lag
+    union all select * from implausible_duration
+    union all select * from conflicting_duplicates
+    union all select * from rejected_at_load
 )
 
 select
@@ -76,7 +91,7 @@ select
     severity,
     rows_affected,
     rows_checked,
-    round(100.0 * rows_affected / nullif(rows_checked, 0), 3) as pct_affected
+    round(100.0 * rows_affected / nullif(rows_checked, 0), 5) as pct_affected
 from unioned
 order by
     case severity when 'high' then 1 when 'medium' then 2 else 3 end,
