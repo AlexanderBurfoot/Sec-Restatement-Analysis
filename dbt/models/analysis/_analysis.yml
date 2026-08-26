@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: dq_scorecard
+    description: >
+      One row per data quality rule with rows affected and rate. The Stage 1
+      headline deliverable.
+    columns:
+      - name: rule_name
+        tests: [unique, not_null]
+
+  - name: dq_unit_inconsistency
+    description: Tags reported in more than one unit of measure.
+
+  - name: dq_custom_tag_share
+    description: >
+      Share of company-specific XBRL extensions by filer status. Quantifies the
+      comparability problem and shows it varies with company size.
+
+  - name: dq_filing_lag_profile
+    description: >
+      Distribution of days between period end and filing, by form type and filer
+      status. Quantifies the window during which reported figures are unknowable.

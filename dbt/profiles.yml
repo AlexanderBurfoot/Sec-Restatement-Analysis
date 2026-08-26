@@ -1,0 +1,13 @@
+sec_restatement:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5433') | int }}"
+      user: "{{ env_var('POSTGRES_USER', 'sec') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'sec') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'sec') }}"
+      schema: public
+      threads: 4
+      keepalives_idle: 0

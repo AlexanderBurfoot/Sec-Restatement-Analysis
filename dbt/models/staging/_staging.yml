@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: stg_submissions
+    description: One row per SEC filing. Carries the filing date and amendment flag.
+    columns:
+      - name: adsh
+        tests: [unique, not_null]
+      - name: cik
+        tests: [not_null]
+      - name: filed_date
+        description: The date these numbers became public. The project turns on this.
+        tests: [not_null]
+      - name: form_type
+        tests:
+          - not_null
+      - name: filing_lag_days
+        description: filed_date minus period_end_date. Negative values are a data issue.
+
+  - name: stg_numeric
+    description: >
+      Numeric facts, one row per reported value per filing. Deduplication is
+      deliberately NOT done here -- duplicates across filings are the signal,
+      not noise.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - adsh
+            - tag
+            - taxonomy_version
+            - coregistrant
+            - period_end_date
+            - qtrs
+            - unit_of_measure
+    columns:
+      - name: adsh
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_submissions')
+              field: adsh
+      - name: qtrs
+        tests:
+          - accepted_values:
+              values: [0, 1, 2, 3, 4]
+              quote: false
+
+  - name: stg_presentation
+    columns:
+      - name: adsh
+        tests: [not_null]
+      - name: statement_code
+        tests:
+          - accepted_values:
+              values: ['BS', 'IS', 'CF', 'EQ', 'CI', 'CP', 'UN']
+
+  - name: stg_tags
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [tag, taxonomy_version]
+    columns:
+      - name: tag
+        tests: [not_null]

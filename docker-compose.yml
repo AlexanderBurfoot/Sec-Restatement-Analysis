@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: sec_pg
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sec}
+      POSTGRES_DB: ${POSTGRES_DB:-sec}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: >
+      postgres
+      -c shared_buffers=1GB
+      -c work_mem=64MB
+      -c maintenance_work_mem=512MB
+      -c effective_cache_size=3GB
+      -c max_parallel_workers_per_gather=4
+      -c random_page_cost=1.1
+      -c track_io_timing=on
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sec}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -1,0 +1,32 @@
+name: dbt build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sec
+          POSTGRES_PASSWORD: sec
+          POSTGRES_DB: sec
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5433
+      POSTGRES_USER: sec
+      POSTGRES_PASSWORD: sec
+      POSTGRES_DB: sec
+      DBT_PROFILES_DIR: ./dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: cd dbt && dbt deps && dbt parse

@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: >
+      SEC Financial Statement Data Sets, landed as TEXT by scripts/load_raw.py.
+      Tab-delimited quarterly bulk files. Casting happens in staging so a
+      malformed value fails a test rather than the load.
+    tables:
+      - name: sub
+        description: >
+          One row per filing (submission). `adsh` is the accession number.
+          The critical field is `filed` -- the date the numbers became public.
+          Never conflate it with `period`, which is the date they describe.
+      - name: num
+        description: >
+          Numeric facts. Composite key is
+          (adsh, tag, version, coreg, ddate, qtrs, uom).
+          `qtrs`: 0 = instant/balance sheet, 1 = one quarter, 4 = annual.
+          Mixing qtrs values produces false restatements.
+          `coreg` identifies a coregistrant (subsidiary), not a revision.
+      - name: pre
+        description: >
+          Presentation. Maps tags to statements via `stmt`
+          (BS, IS, CF, EQ, CI, UN) and gives line ordering.
+      - name: tag
+        description: >
+          Tag dictionary. `custom` = 1 means a company-specific extension
+          rather than a standard US-GAAP tag -- the comparability problem.
+          `crdr` gives the natural credit/debit balance, needed for sign checks.
