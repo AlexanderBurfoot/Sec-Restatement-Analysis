@@ -9,6 +9,15 @@ macro-paths: ["macros"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
+vars:
+  # Below this, a difference between the first and latest reported value for one
+  # described fact is treated as rounding rather than a restatement. Expressed
+  # as a signed fraction of the first reported value, so 0.001 is one tenth of
+  # one percent, matching the bound Stage 1 used for the balance sheet identity.
+  # A judgement call, not a bound derived from the data; docs/findings.md
+  # records how the restatement rate moves with it.
+  restatement_rounding_threshold: 0.001
+
 models:
   sec_restatement:
     staging:

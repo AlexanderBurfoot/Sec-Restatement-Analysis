@@ -31,3 +31,395 @@ models:
       - name: is_current
         description: True for the single open-ended version of each cik.
         tests: [not_null]
+
+  - name: dim_tag
+    description: >
+      The XBRL tag dictionary at grain (tag, taxonomy_version), with statement
+      placement attached from stg_presentation. Type 1: tag.txt arrives as a
+      full snapshot each quarter and the SEC corrects definitions in place under
+      an unchanged taxonomy_version, so the table is overwritten rather than
+      versioned. Placement is a property of the filings that use a tag, not of
+      the dictionary, so a tag can appear on several statements; the most common
+      placement is carried in statement_code and the number of distinct
+      placements observed in n_statement_placements.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [tag, taxonomy_version]
+    columns:
+      - name: tag_sk
+        description: Surrogate key over (tag, taxonomy_version).
+        tests: [unique, not_null]
+      - name: tag
+        description: XBRL element name as reported.
+        tests: [not_null]
+      - name: taxonomy_version
+        description: >
+          Taxonomy the tag was drawn from, or the filing accession number for a
+          company-specific extension tag.
+        tests: [not_null]
+      - name: tag_label
+        description: Human-readable label from the tag dictionary.
+      - name: is_custom
+        description: True for a company extension tag rather than a standard one.
+        tests: [not_null]
+      - name: natural_balance
+        description: Natural balance of the element, D (debit) or C (credit).
+      - name: instant_or_duration
+        description: >
+          I for a point-in-time element, D for one measured over a period.
+      - name: statement_code
+        description: >
+          Most common statement placement across all filings that present the
+          tag: BS, IS, CF, EQ, CI, SI, CP or UN. Null where the tag is defined
+          but never presented in the loaded range.
+      - name: statement_name
+        description: Readable form of statement_code.
+      - name: n_statement_placements
+        description: >
+          Count of distinct statement codes the tag was presented under. 1 for
+          an unambiguous tag, 0 where the tag was never presented, and above 1
+          where statement_code is a majority choice rather than the whole story.
+        tests: [not_null]
+
+  - name: dim_filing
+    description: >
+      One row per SEC submission, keyed on adsh. A thin pass-through over
+      stg_submissions: it adds the surrogate key and the readable filer-status
+      label and otherwise reuses the parsing, lag calculation and amendment
+      flags staging already performs, so no field has two definitions.
+    columns:
+      - name: filing_sk
+        description: Surrogate key over adsh.
+        tests: [unique, not_null]
+      - name: adsh
+        description: SEC accession number, the natural key of a submission.
+        tests: [unique, not_null]
+      - name: cik
+        description: Filer's SEC central index key.
+        tests: [not_null]
+      - name: form_type
+        description: Form the submission was made on, e.g. 10-K, 10-Q, 8-K.
+        tests: [not_null]
+      - name: filer_status
+        description: >
+          SEC accelerated filer status code. Null for filings that report none.
+      - name: filer_status_name
+        description: Readable form of filer_status.
+      - name: fiscal_year
+        description: Fiscal year the submission reports on, as filed.
+      - name: fiscal_period
+        description: Fiscal period focus, FY or Q1 through Q4, as filed.
+      - name: period_end_date
+        description: Balance sheet date of the period reported.
+      - name: filed_date
+        description: >
+          Date the submission became public. Facts join to dim_company on this
+          date, never on period_end_date.
+        tests: [not_null]
+      - name: filing_lag_days
+        description: >
+          Days between period_end_date and filed_date; the window during which
+          the numbers were not yet knowable.
+      - name: is_amendment
+        description: True where the form type ends in /A.
+        tests: [not_null]
+      - name: was_later_amended
+        description: >
+          From sub.prevrpt. True where a subsequent filing amended this one, so
+          its figures were superseded.
+        tests: [not_null]
+
+  - name: dim_date
+    description: >
+      Generated calendar from 2009-01-01 to 2027-12-31, one row per day, wide
+      enough either side of the loaded range that date joins never drop a row.
+      Carries calendar attributes plus an Australian fiscal year (July-June,
+      labelled by the year it ends in), which is the reporting convention this
+      analysis is written for. SEC fiscal periods are not derived here; they
+      stay on dim_filing as the filer reported them.
+    columns:
+      - name: date_sk
+        description: Surrogate key, the date as an integer YYYYMMDD.
+        tests: [unique, not_null]
+      - name: date_day
+        description: The calendar date.
+        tests: [unique, not_null]
+      - name: calendar_year
+        tests: [not_null]
+      - name: calendar_quarter
+        description: Calendar quarter, 1 to 4.
+        tests: [not_null]
+      - name: calendar_month
+        description: Calendar month, 1 to 12.
+        tests: [not_null]
+      - name: iso_week
+        description: ISO 8601 week number.
+        tests: [not_null]
+      - name: day_of_week
+        description: ISO day of week, 1 = Monday through 7 = Sunday.
+        tests: [not_null]
+      - name: is_weekday
+        description: True Monday to Friday.
+        tests: [not_null]
+      - name: month_start_date
+        tests: [not_null]
+      - name: month_end_date
+        tests: [not_null]
+      - name: australian_fiscal_year
+        description: >
+          Australian fiscal year, running 1 July to 30 June and labelled by the
+          calendar year in which it ends: 2023-07-01 to 2024-06-30 is 2024.
+        tests: [not_null]
+
+  - name: fct_financial_fact
+    description: >
+      One row per reported number per filing, at the full composite key
+      (adsh, tag, taxonomy_version, coregistrant, segments, period_end_date,
+      qtrs, unit_of_measure). segments is part of that key: the SEC documents it
+      without, and the documented key yields 4,635,667 violations against 154 on
+      this one. Facts are attributed to dim_company by range join on filed_date
+      (`between valid_from and valid_to`), never on is_current, so each number
+      carries the name and SIC the filer had when it was published.
+      period_end_date and filed_date are held as separate columns throughout and
+      are never collapsed. Incremental with a 30-day filed_date lookback,
+      because amendments to old periods arrive continuously.
+    columns:
+      - name: financial_fact_sk
+        description: >
+          Surrogate key over the eight-column composite key. Unique for all but
+          154 of 42.8m rows; see the unique test below.
+        tests:
+          - not_null
+          - unique:
+              config:
+                severity: warn
+                # 154 known duplicate-key groups (308 rows, 0.00036%) where the
+                # SEC emits two facts at an identical composite key with
+                # different values, mostly investment-schedule and derivative
+                # contract line items whose distinguishing dimension is absent
+                # from segments. 150 of the 154 differ in value, so they are not
+                # deduplicable. The threshold is set above the observed count so
+                # that any new class of collision errors rather than warns; it
+                # is a judgement call, not a derived bound.
+                error_if: '>200'
+                warn_if: '>0'
+      - name: company_sk
+        description: >
+          dim_company version current on filed_date. Resolving it returns the
+          company's as-filed attributes, not its present-day ones.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_company')
+                field: company_sk
+      - name: filing_sk
+        description: dim_filing version of the submission this fact was reported in.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_filing')
+                field: filing_sk
+      - name: tag_sk
+        description: >
+          dim_tag entry for (tag, taxonomy_version), carrying statement
+          placement. Left joined, so null where the dictionary snapshot does not
+          define a reported tag. Null for no rows in the loaded range.
+      - name: filed_date_sk
+        description: dim_date key of filed_date, as an integer YYYYMMDD.
+        tests: [not_null]
+      - name: adsh
+        description: Accession number of the filing that reported this number.
+        tests: [not_null]
+      - name: tag
+        description: XBRL element name as reported.
+        tests: [not_null]
+      - name: taxonomy_version
+        description: >
+          Taxonomy the tag was drawn from, or the accession number for a company
+          extension tag.
+        tests: [not_null]
+      - name: coregistrant
+        description: >
+          Subsidiary filing alongside the parent. Empty string, not null, where
+          the fact is the registrant's own. Two rows differing only by
+          coregistrant are different entities, not a revision.
+        tests: [not_null]
+      - name: segments
+        description: >
+          Flattened reporting dimensions, empty string where the fact is
+          unsegmented. Part of the key.
+        tests: [not_null]
+      - name: period_end_date
+        description: >
+          The period the number describes. Never use this to attribute a fact to
+          a company version.
+      - name: qtrs
+        description: >
+          Duration in quarters: 0 instant, 1 one quarter, 4 annual. Mixing
+          values within a comparison group manufactures false restatements.
+      - name: unit_of_measure
+        description: Unit the value is expressed in, e.g. USD, shares, pure.
+        tests: [not_null]
+      - name: cik
+        description: >
+          Filer's central index key, carried as a degenerate dimension because
+          int_restatements partitions on it.
+        tests: [not_null]
+      - name: filed_date
+        description: >
+          The date the number became public, and the only date a fact may be
+          attributed to a company version on.
+        tests: [not_null]
+      - name: value
+        description: >
+          The reported number. Null where the source value failed the
+          safe_numeric cast.
+      - name: footnote
+        description: Filer's footnote on the fact, null where absent.
+      - name: is_instant
+        description: True where qtrs = 0, i.e. a balance sheet point in time.
+        tests: [not_null]
+      - name: is_annual
+        description: True where qtrs = 4.
+        tests: [not_null]
+      - name: has_segments
+        description: True where the fact carries reporting dimensions.
+        tests: [not_null]
+      - name: source_quarter
+        description: SEC bulk archive the row was loaded from, e.g. 2024q3.
+        tests: [not_null]
+
+  - name: int_restatements
+    description: >
+      One row per described fact whose reported value changed between filings.
+      A described fact is (cik, coregistrant, segments, tag, period_end_date,
+      qtrs, unit_of_measure); adsh is deliberately not part of it, because
+      comparing the same described fact across filings is the whole mechanism.
+      segments and coregistrant are load-bearing members of that key: without
+      segments a segment-level figure is compared against the consolidated
+      total and 23.34% of multi-filing groups appear restated, against 5.43%
+      with it; without coregistrant a subsidiary's figure is compared against
+      its parent's. taxonomy_version is deliberately excluded, because the same
+      concept under us-gaap/2023 and us-gaap/2024 is the same fact and because
+      taxonomy_version is the accession number for a company extension tag,
+      which would put every custom tag in a partition of one.
+      A group qualifies only if it was reported by more than one filing on more
+      than one date, and only if the first-to-latest change exceeds
+      var('restatement_rounding_threshold'). Every measure is anchored on the
+      first reported value rather than the previous one, so pct_revision,
+      days_to_first_revision and revising_form_type all describe the same
+      event: the departure from what was originally published.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cik
+              - coregistrant
+              - segments
+              - tag
+              - period_end_date
+              - qtrs
+              - unit_of_measure
+    columns:
+      - name: restatement_sk
+        description: Surrogate key over the seven-column partition key.
+        tests: [unique, not_null]
+      - name: cik
+        description: Filer's SEC central index key.
+        tests: [not_null]
+      - name: coregistrant
+        description: >
+          Subsidiary filing alongside the parent, empty string where the fact is
+          the registrant's own. In the partition: two rows differing only by
+          coregistrant are different entities, not a revision.
+        tests: [not_null]
+      - name: segments
+        description: >
+          Flattened reporting dimensions, empty string where unsegmented. In the
+          partition: a segment figure and the consolidated total are different
+          facts, and comparing them manufactures restatements at four times the
+          true rate.
+        tests: [not_null]
+      - name: tag
+        description: XBRL element name as reported.
+        tests: [not_null]
+      - name: period_end_date
+        description: The period the number describes, never when it was filed.
+        tests: [not_null]
+      - name: qtrs
+        description: >
+          Duration in quarters, 0 instant, 1 quarterly, 4 annual. In the
+          partition, so a quarterly figure is never compared with an annual one.
+        tests: [not_null]
+      - name: unit_of_measure
+        description: >
+          Unit the value is expressed in. In the partition, so a figure in USD
+          is never compared with one in shares.
+        tests: [not_null]
+      - name: first_reported_value
+        description: Value in the earliest filing to report this fact.
+        tests: [not_null]
+      - name: first_filed_date
+        description: Date that earliest filing was published.
+        tests: [not_null]
+      - name: first_adsh
+        description: Accession number of that earliest filing.
+        tests: [not_null]
+      - name: latest_reported_value
+        description: Value in the most recent filing to report this fact.
+        tests: [not_null]
+      - name: latest_filed_date
+        description: >
+          Date that most recent filing was published. Always strictly later than
+          first_filed_date; see assert_restatement_dates_ordered.
+        tests: [not_null]
+      - name: latest_adsh
+        description: Accession number of that most recent filing.
+        tests: [not_null]
+      - name: n_reports
+        description: >
+          Number of publication dates that reported this fact. Where one date
+          carried conflicting values, that date contributes one report, chosen
+          by highest accession number.
+        tests: [not_null]
+      - name: n_distinct_values
+        description: >
+          Distinct values reported across those dates. 2 for a single revision;
+          above 2 where the figure was revised more than once.
+        tests: [not_null]
+      - name: absolute_revision
+        description: latest_reported_value minus first_reported_value.
+        tests: [not_null]
+      - name: pct_revision
+        description: >
+          absolute_revision as a signed fraction of the first reported value, so
+          0.05 is a five percent upward revision. Null where the first reported
+          value was zero, which offers no scale to express a change against;
+          such rows are kept because a move off zero is a change of kind.
+      - name: first_revision_filed_date
+        description: >
+          Publication date of the earliest filing that departed materially from
+          first_reported_value.
+        tests: [not_null]
+      - name: revising_adsh
+        description: Accession number of that filing, carried so the date is auditable.
+        tests: [not_null]
+      - name: days_to_first_revision
+        description: >
+          Days from first_filed_date to first_revision_filed_date. Always at
+          least 1, because a revision requires that time passed.
+        tests: [not_null]
+      - name: revising_form_type
+        description: >
+          Form the first revising filing was made on. Left joined from
+          dim_filing, so null if that filing ever fails to resolve.
+      - name: revision_direction
+        description: Whether the latest value is above or below the first.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['increase', 'decrease']
