@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: dim_company
+    description: >
+      Type 2 slowly-changing dimension of company attributes, keyed on cik and
+      effective-dated by filed_date. A new version starts whenever company_name,
+      sic_code, fiscal_year_end_mmdd or business_state changes. Facts join on
+      `filed_date between valid_from and valid_to`, so each fact carries the
+      company identity that was current when the number was published rather
+      than the company's present-day identity. Where a cik files more than once
+      on a date, one row is chosen by most recent period reported, then most
+      complete attribute set, then adsh.
+    columns:
+      - name: company_sk
+        description: Surrogate key over (cik, valid_from).
+        tests: [unique, not_null]
+      - name: cik
+        tests: [not_null]
+      - name: valid_from
+        description: First filing date on which this attribute set was current.
+        tests: [not_null]
+      - name: valid_to
+        description: >
+          Last date this version is current, inclusive. 9999-12-31 for the open
+          version.
+        tests: [not_null]
+      - name: version_number
+        description: 1-based sequence of the version within the cik.
+        tests: [not_null]
+      - name: is_current
+        description: True for the single open-ended version of each cik.
+        tests: [not_null]
