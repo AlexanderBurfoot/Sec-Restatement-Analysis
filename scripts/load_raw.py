@@ -1,7 +1,7 @@
 """Load SEC quarterly ZIPs into a raw schema as untyped TEXT columns.
 
 Handles tab delimiters, unquoted text containing stray double quotes, source
-schema drift across quarters, and rows whose free-text fields contain embedded
+schema drift across quarters, and rows whose free text fields contain embedded
 tabs. That last case cannot be repaired reliably, so those rows are rejected and
 counted in raw.load_rejects.
 """

@@ -10,7 +10,13 @@ models:
         tests: [unique, not_null]
 
   - name: dq_unit_inconsistency
-    description: Tags reported in more than one unit of measure.
+    description: >
+      Tags reported under more than one unit of measure. Predominantly IFRS tags
+      from foreign private issuers reporting in home currency, which is correct
+      reporting but means these tags cannot be aggregated across filers without
+      FX conversion. The has_suspect_unit_mix flag isolates genuine tagging
+      errors, where a currency-denominated tag also appears with a
+      non-currency unit.
 
   - name: dq_custom_tag_share
     description: >
