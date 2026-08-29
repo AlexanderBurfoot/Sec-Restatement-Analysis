@@ -11,3 +11,6 @@ __pycache__/
 CLAUDE.md
 PLAN.md
 prepush.sh
+.claude/
+verify_setup.sh
+verify_setup.sh
