@@ -27,3 +27,457 @@ models:
     description: >
       Distribution of days between period end and filing, by form type and filer
       status. Quantifies the window during which reported figures are unknowable.
+
+  - name: rst_by_sector
+    description: >
+      Restatements by SIC division and major group, with a grand total, in one
+      GROUPING SETS pass. Sector is read from the dim_company version current on
+      the fact's first_filed_date, so a company that reclassified is counted
+      under the industry it reported from at the time rather than its
+      present-day SIC. Both numerator and denominators use that same as-at rule.
+      Two rates are carried because they answer different questions:
+      pct_of_revisable_restated divides by described facts that were reported on
+      more than one date and so could have been revised, which is bounded 0-100
+      and comparable across sectors; restatements_per_filing is the
+      volume-normalised count and is not a probability, since one filing can
+      restate many facts.
+    columns:
+      - name: aggregation_level
+        description: major_group, division, or grand_total.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['major_group', 'division', 'grand_total']
+      - name: sic_division
+        description: >
+          SIC division name, derived from contiguous ranges over the four-digit
+          code. 'Unclassified' where the filer reported no SIC or a non-numeric
+          one; 'All sectors' on the grand total row.
+        tests: [not_null]
+      - name: sic_major_group
+        description: >
+          Leading two digits of the SIC code, one level finer than the division.
+          Null on division and grand total rows.
+      - name: restatements
+        description: Restated described facts attributed to the sector.
+        tests: [not_null]
+      - name: revisable_groups
+        description: >
+          Described facts reported on more than one date, and so capable of
+          being revised. The denominator a restatement rate needs.
+      - name: filings
+        description: Submissions filed by companies in the sector.
+      - name: pct_of_revisable_restated
+        description: >
+          restatements as a percentage of revisable_groups. The defensible rate.
+      - name: restatements_per_filing
+        description: >
+          restatements divided by filings. Runs well above 1 because one filing
+          restates many facts; read only as a between-sector comparison.
+      - name: pct_companies_restating
+        description: Share of the sector's filers with at least one restatement.
+      - name: pct_restatements_downward
+        description: >
+          Share of the sector's restatements that revised a figure down.
+      - name: median_abs_pct_revision
+        description: >
+          Median unsigned revision as a fraction of the original value.
+
+  - name: rst_magnitude_distribution
+    description: >
+      Histogram of revision size with direction as a dimension rather than a
+      filter, so a systematic bias shows as a shape difference. Two bucketings
+      of the same rows are carried under bucket_scale: linear_5pt is 5-point
+      buckets of the unsigned revision share from 0 to 100% with an overflow
+      bucket above, and log10_decade is one bucket per decade, because the
+      observed spread runs over thirteen orders of magnitude and a linear axis
+      alone is uninformative. Restatements off an originally reported zero have
+      no denominator and cannot be bucketed; they are carried under
+      bucket_scale = 'no_denominator' so the model reconciles to
+      int_restatements rather than dropping them silently.
+    columns:
+      - name: bucket_scale
+        description: linear_5pt, log10_decade, or no_denominator.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['linear_5pt', 'log10_decade', 'no_denominator']
+      - name: revision_direction
+        description: increase, decrease, or 'all' for the rolled-up row.
+        tests: [not_null]
+      - name: bucket_index
+        description: >
+          width_bucket output. For linear_5pt, 1-20 span 0 to 100% and 21 is the
+          overflow bucket. For log10_decade, bucket n covers 10^(n-4) to 10^(n-3)
+          as a fraction, and the top bucket is the overflow.
+        tests: [not_null]
+      - name: bucket_label
+        description: Readable range for the bucket.
+        tests: [not_null]
+      - name: restatements
+        description: Restatements falling in the bucket.
+        tests: [not_null]
+      - name: pct_of_direction
+        description: >
+          The bucket's share of all restatements in that direction and scale.
+      - name: p50_abs_pct_revision
+        description: >
+          Median unsigned revision share for the direction. Constant within
+          direction and repeated onto every bucket row.
+      - name: p75_abs_pct_revision
+        description: 75th percentile of the unsigned revision share.
+      - name: p90_abs_pct_revision
+        description: 90th percentile of the unsigned revision share.
+      - name: p99_abs_pct_revision
+        description: 99th percentile of the unsigned revision share.
+      - name: median_signed_pct_revision
+        description: >
+          Median signed revision share. This, not the spread, is what shows a
+          directional bias.
+
+  - name: rst_by_statement
+    description: >
+      Restatements by financial statement placement and by tag, with the top 15
+      tags inside each statement, in one GROUPING SETS pass. int_restatements is
+      keyed on tag without taxonomy_version while dim_tag is keyed on both, so
+      the dictionary is collapsed to tag grain by modal statement across the
+      versions that define it; placement_is_ambiguous marks a tag whose
+      statement is a majority choice rather than a fact about it. Driven from
+      the revisable-fact universe rather than from the restatements, so a tag
+      reported repeatedly and never revised is a real zero in its statement's
+      denominator. Statement and grand totals are computed over every tag, so a
+      total is never merely the sum of the rows shown beneath it.
+    columns:
+      - name: aggregation_level
+        description: tag, statement, or grand_total.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['tag', 'statement', 'grand_total']
+      - name: statement_code
+        description: >
+          BS, IS, CF, EQ, CI, SI, CP or UN; 'NP' where the tag is never
+          presented on a statement in the loaded range, 'ALL' on the grand total.
+        tests: [not_null]
+      - name: statement_name
+        description: Readable form of statement_code.
+        tests: [not_null]
+      - name: tag
+        description: XBRL element name. Null on statement and grand total rows.
+      - name: rank_within_statement
+        description: >
+          Rank of the tag by restatement count inside its statement. Null on
+          rolled-up rows.
+      - name: restatements
+        description: Restated described facts carrying this tag.
+        tests: [not_null]
+      - name: revisable_groups
+        description: >
+          Described facts with this tag reported on more than one date. A tag
+          reported on every filing accumulates revisions by exposure alone,
+          which this divides out.
+      - name: restating_companies
+        description: >
+          Distinct filers with at least one restatement here. Computed from the
+          restatement rows at each level, not summed from tag counts, because
+          one filer revising ten line items is one company and not ten.
+      - name: distinct_tags
+        description: Tags contributing to the row.
+      - name: pct_of_revisable_restated
+        description: restatements as a percentage of revisable_groups.
+      - name: includes_custom_tag
+        description: True where any contributing tag is a company extension.
+      - name: placement_is_ambiguous
+        description: >
+          True where a contributing tag is presented under more than one
+          statement across taxonomy versions, so its placement is a modal choice.
+
+  - name: rst_clustering
+    description: >
+      Restatements per calendar quarter against a trailing four-quarter average,
+      on two clocks carried under quarter_basis: 'revision_filed' is the quarter
+      a revision was published, 'period_restated' is the quarter whose figures
+      it revised. Each clock carries a denominator, because a raw count would
+      only rediscover that more filings arrive in 10-K season, which is filing
+      seasonality and not restatement clustering. Quarters are calendar, not
+      filer fiscal, because SEC fiscal periods differ per filer and are not a
+      common time axis to average along. The series is densified from dim_date
+      so an empty quarter enters at zero rather than being closed up, and the
+      trailing window excludes the current quarter so a spike is not measured
+      against a baseline it is itself inflating.
+    columns:
+      - name: quarter_basis
+        description: revision_filed or period_restated.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['revision_filed', 'period_restated']
+      - name: quarter_start_date
+        description: First day of the calendar quarter.
+        tests: [not_null]
+      - name: denominator_kind
+        description: >
+          filings_published_in_quarter for the revision clock,
+          revisable_facts_for_period for the period clock.
+      - name: restatements
+        description: Restatements attributed to the quarter on this clock.
+        tests: [not_null]
+      - name: denominator
+        description: Exposure for the quarter, per denominator_kind.
+      - name: restatements_per_1k
+        description: Restatements per thousand units of the denominator.
+      - name: trailing_avg_restatements
+        description: >
+          Mean count over the four preceding quarters, current quarter excluded.
+      - name: trailing_avg_rate
+        description: Mean restatements_per_1k over the same window.
+      - name: count_vs_trailing
+        description: >
+          Count as a ratio of its trailing average. Above 1 is a hotter quarter,
+          but moves with filing volume.
+      - name: rate_vs_trailing
+        description: >
+          Rate as a ratio of its trailing average. The volume-controlled version
+          and the one to read.
+      - name: has_full_trailing_window
+        description: >
+          False for the opening quarters of each series, where fewer than four
+          preceding quarters exist and the ratios should not be read as findings.
+        tests: [not_null]
+
+  - name: rst_amendment_chains
+    description: >
+      Chains of successive revisions to one described fact, built with a
+      recursive walk so a fact revised three times is one chain of length three
+      rather than three unrelated rows. int_restatements measures every revision
+      against the first reported value, which is right for sizing a restatement
+      but collapses the steps; a chain needs each step measured against the
+      previous report, so the report sequence is rebuilt here on the same
+      one-report-per-date collapse and the same materiality threshold. Two
+      result sets share the table under result_scope:
+      'chain_length_distribution' is one row per chain length, and
+      'filer_concentration' is the 25 filers with the most chains of length
+      three or more.
+    columns:
+      - name: result_scope
+        description: chain_length_distribution or filer_concentration.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['chain_length_distribution', 'filer_concentration']
+      - name: result_key
+        description: >
+          Chain length on distribution rows, cik on filer rows. Text because the
+          two scopes share the column.
+        tests: [not_null]
+      - name: company_name
+        description: Filer name on concentration rows, null on distribution rows.
+      - name: chains
+        description: Chains in the row.
+        tests: [not_null]
+      - name: companies
+        description: >
+          Distinct filers on distribution rows; always 1 on filer rows, which are
+          already at company grain.
+      - name: mean_chain_span_days
+        description: Mean days from a chain's first report to its last revision.
+      - name: median_chain_span_days
+        description: Median of the same span.
+      - name: long_chains
+        description: >
+          Chains of length three or more. Null on distribution rows, where the
+          length is the key.
+      - name: pct_chains_long
+        description: >
+          Share of the filer's chains that are long. The predictive signal: a
+          filer whose chains are mostly length one revises and stops.
+
+  - name: rst_serial_restaters
+    description: >
+      One row per filer, distinguishing sustained restatement from scattered
+      restatement. Islands are computed over the company's own reporting
+      timeline — the quarters it actually filed for, taken from dim_filing — so
+      a gap in the run means the company did not report then, not that it
+      reported cleanly. Restated periods falling outside that timeline are
+      excluded from the run logic on purpose, since a 2023 filing revising a
+      2019 comparative says nothing about whether 2019 was a consecutive bad
+      quarter for a filer that was not reporting then; those restatements are
+      still counted in total_restatements. NTILE ranks only filers with at least
+      four reporting periods, because one reported period and one restated
+      period is a rate of 100% that would otherwise top every decile; the
+      four-period floor is a judgement call, not a bound derived from the data.
+    columns:
+      - name: cik
+        description: Filer's SEC central index key. One row per filer.
+        tests: [unique, not_null]
+      - name: company_name
+        description: >
+          Name on the filer's current dim_company version, used as a label only.
+      - name: n_reporting_periods
+        description: Distinct fiscal quarters the filer submitted a filing for.
+        tests: [not_null]
+      - name: n_restated_periods
+        description: >
+          How many of those quarters contain at least one restated fact.
+        tests: [not_null]
+      - name: total_restatements
+        description: >
+          Every restatement the filer owns, including those on periods outside
+          its reporting timeline, so this reconciles to int_restatements.
+        tests: [not_null]
+      - name: distinct_tags_restated
+        description: Distinct line items the filer revised.
+      - name: pct_periods_restated
+        description: n_restated_periods over n_reporting_periods, as a percentage.
+      - name: n_restatement_runs
+        description: >
+          Islands of consecutive restated periods. Many short runs is a scatter;
+          one long run is a sustained failure.
+        tests: [not_null]
+      - name: longest_run_periods
+        description: Length in periods of the filer's longest unbroken run.
+        tests: [not_null]
+      - name: longest_run_start_quarter
+        description: First quarter of that longest run.
+      - name: longest_run_end_quarter
+        description: Last quarter of that longest run.
+      - name: restatement_rate_decile
+        description: >
+          NTILE(10) over pct_periods_restated, 10 being the worst. Null for
+          filers below the four-period ranking floor.
+      - name: is_rankable
+        description: Whether the filer met that floor.
+        tests: [not_null]
+      - name: restatement_pattern
+        description: >
+          none, isolated (one period), sustained_run (longest run of three or
+          more), scattered (three or more separate runs, none reaching three),
+          or intermittent.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['none', 'isolated', 'sustained_run', 'scattered', 'intermittent']
+
+  - name: rst_by_filer_size
+    description: >
+      Restatement rate against two measures of filer size, stacked in one table
+      because they disagree. The SEC's regulatory bands (sub.afs) grade
+      monotonically — non-accelerated filers restate at 5.43% of revisable facts
+      against 4.06% for large accelerated, and their median revision is 85% of
+      the originally reported value against 16%. Deciles of consolidated total
+      assets do not grade: the rate falls from 8.07% in the second decile to
+      3.39% in the ninth, then turns back up to 4.19% in the largest. The
+      regulatory cut cannot show the reversal because 1-LAF spans it, running
+      from 45% of the seventh decile to 85% of the tenth. Revision magnitude,
+      unlike frequency, does grade monotonically on both measures.
+
+      The segment and sector splits are columns rather than separate models, so
+      the reversal can be read off a single row. Both were run as controls
+      against it — large filers report proportionally more segment-level facts
+      (58% of revisable groups in the top decile against 40% in the bottom) and
+      skew financial (37% against 13%), so either mix could have produced the
+      uptick on its own. Neither does: the same shape appears inside the
+      consolidated-only and segment-only populations separately, and inside both
+      sector groups. The uptick is sharpest among large financials, which is
+      hypothesised as where it lives and not an established cause.
+    columns:
+      - name: size_basis
+        description: >
+          Which size measure the row bands on. filer_status is an attribute of
+          the filing that first published each fact and is as-at; assets_decile
+          is an attribute of the company and is not.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['filer_status', 'assets_decile']
+      - name: size_band
+        description: >
+          The band within the basis: an afs code such as 1-LAF, or a
+          zero-padded decile 01-10. 'unknown' where the filing reported no
+          filer status; 'unclassified' where the company reported no
+          consolidated USD total assets and so could not be deciled.
+        tests: [not_null]
+      - name: size_band_label
+        description: Readable form of size_band.
+        tests: [not_null]
+      - name: band_sort
+        description: >
+          Ordering position within the basis. 99 for the unknown and
+          unclassified bands, which have no place on the size scale.
+        tests: [not_null]
+      - name: min_total_assets
+        description: >
+          Smallest total assets in the decile. Null on filer_status rows, which
+          are not defined by an asset range, and on the unclassified band.
+      - name: median_total_assets
+        description: Median total assets in the decile. Null on the same rows.
+      - name: companies
+        description: Distinct filers contributing at least one revisable fact to the band.
+        tests: [not_null]
+      - name: restating_companies
+        description: Of those, how many restated at least one fact.
+        tests: [not_null]
+      - name: pct_companies_restating
+        description: >
+          Company-level incidence. Rises with size while the fact-level rate
+          falls, because larger filers report far more facts and so have more
+          opportunities to revise one.
+      - name: revisable_groups
+        description: >
+          Described facts reported on more than one date, and so capable of
+          being revised. The same denominator rst_by_sector uses.
+        tests: [not_null]
+      - name: restatements
+        description: Restated described facts attributed to the band.
+        tests: [not_null]
+      - name: pct_of_revisable_restated
+        description: >
+          The headline rate: restatements as a share of revisable_groups.
+          Bounded 0-100 and comparable across bands of any size.
+        tests: [not_null]
+      - name: median_abs_pct_revision
+        description: >
+          Median absolute revision as a fraction of the originally reported
+          value. Grades monotonically with size on both bases, unlike the rate.
+      - name: revisable_groups_consolidated
+        description: Revisable facts carrying no segment breakdown.
+      - name: restatements_consolidated
+        description: Restatements among them.
+      - name: pct_restated_consolidated
+        description: The rate within consolidated facts only.
+      - name: revisable_groups_segment
+        description: Revisable facts reported at segment level.
+      - name: restatements_segment
+        description: Restatements among them.
+      - name: pct_restated_segment
+        description: The rate within segment-level facts only.
+      - name: pct_segment_level
+        description: >
+          Segment-level share of the band's revisable facts. The mix that the
+          consolidated and segment rates control for.
+      - name: revisable_groups_financial
+        description: >
+          Revisable facts from companies whose as-at SIC falls in 6000-6799, the
+          same boundary rst_by_sector uses for its Finance, Insurance & Real
+          Estate division.
+      - name: restatements_financial
+        description: Restatements among them.
+      - name: pct_restated_financial
+        description: The rate within financial-sector companies only.
+      - name: revisable_groups_non_financial
+        description: Revisable facts from all other companies.
+      - name: restatements_non_financial
+        description: Restatements among them.
+      - name: pct_restated_non_financial
+        description: The rate within non-financial companies only.
+      - name: pct_financial
+        description: >
+          Financial-sector share of the band's revisable facts. The mix that the
+          two sector rates control for.
