@@ -1,0 +1,6 @@
+# dbt models are the substance of this project. Linguist classifies .sql as
+# data by default, which hides ~2,000 lines of SQL behind ~300 of Python.
+*.sql linguist-detectable=true
+*.sql linguist-language=SQL
+dbt/target/** linguist-generated=true
+dbt/dbt_packages/** linguist-vendored=true
