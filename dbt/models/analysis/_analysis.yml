@@ -481,3 +481,206 @@ models:
         description: >
           Financial-sector share of the band's revisable facts. The mix that the
           two sector rates control for.
+
+  - name: fil_lag_by_form
+    description: >
+      Two waits on one row, by form type and filer status. The period-end to
+      publication columns are carried through from dq_filing_lag_profile by
+      join rather than recomputed, so there is one definition of filing lag in
+      the project. What is new is the gap between an original filing and its own
+      amendment, which measures how long a superseded number stood before the
+      revision arrived, and the rate at which each form gets amended at all.
+      Grain is (form_type, filer_status) with both non-null; the grouping-set
+      subtotals in dq_filing_lag_profile carry a null in one of those columns
+      that is indistinguishable from the 758 filings whose afs is genuinely
+      blank, so totals are left upstream where they are unambiguous. Amendments
+      whose original was filed before 2023-01-03 have nothing in range to match,
+      which is why n_amendments and n_matched_to_original are both reported.
+      n_flagged_later_amended and n_observed_amended disagree in the same
+      direction throughout — the prevrpt flag counts fewer amended originals
+      than are actually observed being amended. Staleness of the flag is
+      hypothesised, not established: the share of amended originals carrying the
+      flag falls from 70.8% where the amendment arrived within 90 days to 41.8%
+      beyond a year, which fits a flag written once and not revised, but it does
+      not account for the roughly 30% of quickly-amended originals that are
+      never flagged at all. Both counts are reported rather than reconciled.
+    columns:
+      - name: form_type
+        tests: [not_null]
+      - name: filer_status
+        tests: [not_null]
+
+  - name: fil_lag_trend
+    description: >
+      Filing lag by quarter over the loaded range, one series per
+      (form_type, filer_status). Aggregated by filing quarter rather than period
+      quarter because the load is organised by filing quarter, which makes
+      2023Q1-2025Q4 twelve complete quarters; on a period axis the recent end is
+      censored, since a period ending 2025-12-31 is filed in 2026 and would show
+      a spuriously short lag drawn from early filers alone. Seasonality dominates
+      the series, so both comparisons span a full cycle: a trailing four-quarter
+      mean excluding the current quarter, and the same quarter one year earlier.
+      The fitted slope is reported with the r-squared of the same fit and the
+      series standard deviation beside it. Twelve points cannot separate a trend
+      from quarterly seasonality, and trend_reading says so wherever r-squared
+      falls below 0.5, which on the loaded range is every series.
+    columns:
+      - name: filed_quarter
+        tests: [not_null]
+      - name: quarter_index
+        tests: [not_null]
+
+  - name: fil_deadline_filers
+    description: >
+      One row per company, ranking filers by how much margin they leave against
+      their own statutory deadline. Days of lag are not comparable across filer
+      statuses because the deadline is not — 10-K is 60/75/90 days and 10-Q is
+      40/40/45 by accelerated filer status — so each filing is measured against
+      its own due date, rolled forward over weekends per Rule 0-3(a). Federal
+      holidays are not modelled because dim_date does not carry them; the effect
+      is one-sided and small, understating a handful of due dates by a day.
+      The one-day deadline bound is derived from the observed margin
+      distribution rather than chosen: filings land on the due date itself at
+      20.1% of the -3..+14 day window and the next day at 10.8%, against a flat
+      plateau near 7% per day from day 2 to day 7. Runs of consecutive deadline
+      filings are found by gap and island over the company's own filing
+      sequence, so a habitual deadline filer is separated from one that did it
+      twice. Originals only; amendments have no deadline of their own.
+    columns:
+      - name: cik
+        tests: [unique, not_null]
+      - name: deadline_pattern
+        tests:
+          - accepted_values:
+              values: ['never_at_deadline', 'isolated', 'intermittent', 'episodic', 'habitual']
+
+  - name: pit_peer_comparables
+    description: >
+      The model the two-date mechanic exists to justify. Net margin and revenue
+      growth percentiles are computed within SIC major group twice over the
+      identical companies and the identical fiscal year: once using only what
+      was knowable on 2024-06-30 — facts filed strictly before it, and the SIC
+      on the dim_company version current then — and once using every filing in
+      the loaded range and the current SIC. The fiscal period is chosen once
+      from the point-in-time view and both sides are pinned to it, so a
+      restatement is never compared against a newer annual period. The
+      population is held to companies present in both views for the same reason.
+      Quartile 1 is the best performer. Peer groups below 20 companies are
+      dropped from both views rather than ranked. any_quartile_changed counts
+      every bucket move; any_material_quartile_change additionally requires the
+      company's rank within its peer group to have moved by 0.05, which is what
+      separates a genuine reordering from a company sitting a hundredth of a
+      percentile from a cut that moved when four peers joined its SIC group.
+      change_attribution names the mechanism, including the case where a
+      company's own inputs and SIC both held still and its peers moved beneath
+      it.
+    columns:
+      - name: cik
+        tests: [unique, not_null]
+      - name: change_attribution
+        tests:
+          - accepted_values:
+              values: ['unchanged', 'own_values_restated', 'sic_reclassified', 'restated_and_reclassified', 'peer_distribution_moved']
+      - name: pit_margin_quartile
+        tests:
+          - accepted_values: {values: [1, 2, 3, 4], quote: false}
+      - name: latest_margin_quartile
+        tests:
+          - accepted_values: {values: [1, 2, 3, 4], quote: false}
+
+  - name: feat_filing_base
+    description: >
+      The population, label and shared features behind the point-in-time feature
+      comparison. One row per 10-K or 10-Q filed with a complete observation
+      window: originals only, and nothing filed within one label horizon of the
+      end of the loaded range, because a filing still being watched cannot be
+      labelled clean. A filing is restated if it published a consolidated figure
+      — segments and coregistrant both empty — that a later filing revised
+      within restatement_label_horizon_days of it. The horizon is what makes the
+      label mean the same thing in every quarter: measured without one, the share
+      of filings ever restated falls from 62.1% in 2023Q1 to 0.7% in 2025Q4, and
+      that is elapsed observation time rather than filer behaviour. Counting
+      segment-level and subsidiary-level revisions as well would raise the
+      positive rate from 11.65% to 20.75%, mostly through the re-tagging of
+      dimensional breakdowns. Carries both SIC readings, at filing and current,
+      for the two downstream models to pick from.
+    columns:
+      - name: adsh
+        tests: [unique, not_null]
+      - name: was_restated
+        tests: [not_null]
+      - name: form_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['10-K', '10-Q']
+      - name: custom_tag_share
+        tests: [not_null]
+      - name: filing_lag_days
+        tests: [not_null]
+
+  - name: feat_filing_pit
+    description: >
+      Five features for one filing using only what was knowable on its filing
+      date. filing_lag_days, filer status and custom_tag_share are properties of
+      the filing as published and are read unchanged from feat_filing_base. The
+      other two have a history and it is respected: prior_restatement_count
+      admits a revision on the day that revision was published, and
+      sector_restatement_rate is an expanding window over filings of the same SIC
+      major group — as recorded on the dim_company version current at filing —
+      whose own observation window had already closed. Dating the sector
+      contribution at filed_date plus the horizon rather than at filed_date is
+      what keeps filings still being watched out of the denominator as clean
+      ones. Both features are built by running sum over a sorted union of query
+      rows and event rows, with query rows sorting before same-day events, so a
+      filing never sees a revision published on its own filing date and never
+      sees itself. Sectors with no resolved history fall back to the whole-market
+      rate to date, which is early 2023 for everyone and permanent for the 2.5%
+      of filings carrying no numeric SIC.
+    columns:
+      - name: adsh
+        tests: [unique, not_null]
+      - name: prior_restatement_count
+        tests: [not_null]
+      - name: sector_restatement_rate
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+                inclusive: true
+
+  - name: feat_filing_naive
+    description: >
+      The same five features over the same filings and the same label, computed
+      over the whole loaded range. Four things leak across the two features: the
+      sector is read from the dim_company version current today, joined on
+      is_current rather than range-joined on filed_date; the sector rate spans
+      filings made after this one; it also includes the filing being scored; and
+      prior_restatement_count counts the company's revised filings across the
+      whole range, the scored filing included, with a test-split median of 7 for
+      restated filings against 4 for clean ones. How much of this a working
+      modeller would actually write is hypothesised and was not surveyed — two of
+      the four are the path of least resistance, but the prior_restatement_count
+      construction is harder to defend that way and is the one carrying almost
+      all of the measured gap. A missing date predicate is also not the whole
+      difference: adding one to the sector rate would still leave filings inside
+      their own observation window in the denominator as clean ones, which is why
+      feat_filing_pit dates each contribution at filed_date plus the horizon.
+      Paired with feat_filing_pit by scripts/train_compare.py, which fits the
+      same trivial logistic regression to both and reports the distance between
+      them.
+    columns:
+      - name: adsh
+        tests: [unique, not_null]
+      - name: prior_restatement_count
+        tests: [not_null]
+      - name: sector_restatement_rate
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+                inclusive: true

@@ -5,13 +5,29 @@ detect restatements: cases where a company published one value for a reported
 figure and later published another for the same figure, same period, same unit.
 Every numeric fact carries two dates (the period it describes and the date it
 became public) and keeping those apart is what makes the comparison possible.
-The warehouse also measures how long figures take to become public and where the
-source fails basic validity checks.
+The warehouse also measures how long figures take to become public, who files to
+the deadline, where the source fails basic validity checks, and, the point of
+keeping the two dates apart, what it costs to compare companies using figures
+that did not exist on the date the comparison claims to stand on.
 
 Postgres and dbt over **42,797,341 numeric facts from 81,720 filings**,
 2023 Q1 to 2025 Q4, from which **426,706 restatements** are detected.
 
 ## Headline findings
+
+**Comparing companies on restated figures reclassifies one in thirty-three into
+a different quartile.** The same peer comparison was built twice over the
+identical **3,441 companies** and the identical fiscal year: once from what was
+knowable on 2024-06-30, once from everything filed since. Same metric, same peer
+universe, same period, same code, the two views differ in one date and nothing
+else. **103 companies land in a different performance quartile**, 42 of them
+moving two or more and 13 moving three, and nothing on the output marks which
+rows moved. The
+largest single cause is not restatement but **industry reclassification: 19
+companies changed SIC major group and 18 of the 19 moved quartile materially**,
+including nine software and electronics firms that became financial firms after
+the period. This is the result the two-date design exists to produce; no
+warehouse that overwrites figures in place can measure it.
 
 **Restatements do not arrive in amendments.** Only **8.26%** of the 426,706
 detected revisions were carried by a form ending in `/A`. The other 91.7%
@@ -42,6 +58,15 @@ reductions. Sign flips carry an identical magnitude either side, so their
 direction is meaningless; excluding them gives **58.51%**, and excluding all three
 artefact categories gives **60.02%**. Those categories are themselves strongly
 upward, so they were diluting the result rather than causing it.
+
+**Leaking two features across the filing date manufactures 0.11 to 0.13 of test
+AUC.** Two feature tables over the same 58,726 filings, the same label and the
+same deliberately trivial logistic regression, differing only in whether the
+company's prior-restatement count and its sector base rate were computed as of
+`filed_date` or over the whole loaded range. Point-in-time scores **0.59–0.61**
+on unseen filings; the naive table scores **0.72**. Almost all of the difference
+is one feature, a full-window restatement count that includes the very
+restatement it is being asked to predict.
 
 **Restating is normal, which inverts the data quality result.** 86.8% of
 companies restate something and 54% do it in sustained runs of three or more
@@ -87,6 +112,119 @@ precision rather than a restatement. It is a judgement call, not a bound derived
 from a distribution, and [`docs/findings.md`](docs/findings.md) §2.8 gives the
 full sensitivity: moving it across two orders of magnitude moves the rate from
 5.12% to 3.59%.
+
+## Filing behaviour and point-in-time comparables
+
+Stage 3 asks what the two dates are worth once they are kept apart. Four models,
+documented in [`docs/findings.md`](docs/findings.md) §3.
+
+**The original-to-amendment gap is 98 days.** §1.2 had inferred roughly 140 by
+subtracting one median from another; pairing each amendment to the specific
+original it amends gives 98, and removes amendments of pre-2023 originals from
+both sides at once. The gradient inverts the data quality one: large accelerated
+filers publish fastest and amend slowest, a median 159 days against 92 for
+non-accelerated filers. The SEC's own `prevrpt` flag marks 1.20% of originals as
+superseded where 1.87% are observably amended.
+
+**Filing promptness has not drifted over twelve quarters.** None of the six
+form-and-status series clears r² = 0.5, and seasonality is an order of magnitude
+larger than any fitted trend, non-accelerated 10-K lag swings 27 days inside one
+year against a slope of exactly zero. This is reported as a negative result, not
+as evidence that no drift exists; the series is too short and too seasonal to
+rule out a drift of under a day per year.
+
+**2,862 companies file to the deadline habitually**, established by runs of three
+or more consecutive filings found by gap-and-island rather than by a count, which
+separates them from the 1,141 intermittent and 433 episodic companies that file
+at the deadline nearly as often but never in a sustained run.
+
+| Measure | Value |
+|---|---|
+| Companies compared point-in-time vs latest | 3,441 |
+| Changed quartile on margin or growth | 264 |
+| **Changed quartile materially** | **103** (96 after artefacts) |
+| Caused by the company's own restated values | 88 (74 material) |
+| Caused by SIC reclassification | 19 (18 material) |
+| Caused by both | 7 (7 material) |
+| Caused only by peers' figures moving | 150 (4 material) |
+| Filings made at their statutory deadline | 25,782 of 69,907 (36.88%) |
+| Filings late (range, see below) | 6.46% – 11.97% |
+
+**The late-filing rate is published as a range because the data cannot narrow
+it.** 8,371 filings miss the statutory due date, but 3,856 of those land inside
+the Rule 12b-25 extension window and were probably deemed timely. Form 12b-25
+carries no XBRL and is therefore absent from the SEC's financial statement data
+sets, so whether the extension was actually invoked is unobservable here.
+§3.5 also finds that roughly 290 late flags are federal-holiday artefacts, 236 of
+them sharing a single due date.
+
+## What point-in-time discipline is worth
+
+Stage 4 prices the two-date mechanic against a prediction rather than a ranking.
+Two feature tables over the same **58,726 filings**, every 10-K and 10-Q with a
+complete observation window, carrying the same label (did this filing publish a
+consolidated figure revised within 180 days) and the same five features. The only
+difference is whether the company's prior-restatement count and its sector base
+rate were computed from what was knowable at `filed_date` or from the whole
+loaded range. `scripts/train_compare.py` fits the same logistic regression to
+both, training on filings before 2025 and testing on filings after, never a
+random split: these are panel data and a random split lets the model recognise
+the company instead of predicting anything.
+
+| Feature set | Test AUC |
+|---|---|
+| Point-in-time | 0.5894 – 0.6102 |
+| Naive | 0.7172 – 0.7218 |
+| **Gap** | **0.1116 – 0.1278** |
+
+**Between 0.11 and 0.13 of test AUC is information from after the filing date.**
+That is the distance between a weak but honest model and one that reads as a
+usable early-warning screen, and nothing on the naive table marks it, same rows,
+same label, same five column names.
+
+The model is deliberately trivial and is not the deliverable: scikit-learn's
+default logistic regression on standardised inputs, no tuning, no class
+weighting, no feature engineering. A better model would raise both numbers. The
+gap is the point.
+
+**Almost all of it is one feature.** `prior_restatement_count` over the full
+window scores 0.7180 on its own, higher than the entire fitted naive model,
+because the restatement that sets the label is one of the events it counts.
+Point-in-time, the same feature scores 0.5669. The range is quoted rather than a
+single number because the point-in-time sector rate has no history to read during
+the first months of the loaded range, and the second figure in each row drops
+those warm-up rows from both models' training sets identically.
+
+**The gap does not turn on the 180-day label horizon.** Rebuilt at 90, 120, 180,
+240 and 270 days, one var, with the population, the label, both feature tables
+and both singular tests following from it, the gap sits between 0.115 and 0.130
+across the first four. The 270-day point is larger (0.168) and is discounted: its
+test set is a single annual-report quarter of 5,277 filings.
+[`docs/findings.md`](docs/findings.md) §4 sets out the label design, the
+sensitivity, the verification, and what the range does and does not establish.
+
+## Query performance
+
+Three optimisations measured before and after against the 42.8M-row fact table,
+with full plans, block counts and interleaved timings in
+[`docs/performance.md`](docs/performance.md).
+
+| # | Query | Before | After | Change | Result |
+|---|---|---|---|---|---|
+| 1 | Restatement self-join, 20 filers | 57.0 s | **2.31 s** | B-tree `(cik, tag, period_end_date)`, 1027 MB | **25×** |
+| 2 | One month of facts by `filed_date` | 8.0 s | 6.4 s | BRIN on `filed_date`, 376 kB | **no change, identical plan** |
+| 2b | *same query* | 8.0 s | **1.01 s** | B-tree on `filed_date`, 283 MB | **8×**, at 771× the index size |
+| 3 | First/latest value per described fact | 30.0 s | **10.6 s** | correlated subquery → window function | **2.8×** |
+| 3b | *same, 3.6× the rows* | 192.2 s | **10.3 s** | *same* | **18.6×** |
+
+Case 2 is a negative result and is documented at length because of it: BRIN was
+the wrong instrument for a column with a correlation of 0.029, and case 2b is the
+control proving the query was improvable anyway. The document also records that
+the measurement environment degraded ~45% mid-session, invalidating a first round
+of numbers; every figure above comes from a single clean pass taken afterwards.
+
+Every index created for these measurements was dropped afterwards. The table
+ships with one index, on `financial_fact_sk`.
 
 ## Data quality scorecard
 
@@ -157,19 +295,23 @@ consecutive builds disagreed.
 ## Structure
 
 ```
-scripts/     fetch and load (the only Python in the project)
+scripts/     fetch, load, build fingerprint, and the Stage 4 model comparison
 dbt/
   models/
     staging/   typed, tested views over the raw text
     marts/     dim_company (SCD2), dim_tag, dim_filing, dim_date,
                fct_financial_fact (incremental), int_restatements
     analysis/  the queries that produced the findings above
-  tests/       singular tests; four fire as documented warnings
+  tests/       10 singular tests; 5 tests warn, each documented in findings.md
 docs/
-  findings.md  the analysis   §1 data quality, §2 restatements
+  findings.md     the analysis   §1 data quality, §2 restatements,
+                  §3 filing behaviour and point-in-time comparables,
+                  §4 what point-in-time discipline is worth
+  performance.md  three query optimisations, measured
 ```
 
-All transformation is SQL. Python handles file acquisition and ingestion only.
+All transformation is SQL. Python handles file acquisition, ingestion and one
+scikit-learn call; no aggregation happens outside the database.
 
 ## Scope and limitations
 
@@ -196,6 +338,20 @@ All transformation is SQL. Python handles file acquisition and ingestion only.
 - **236 rows were rejected at ingestion** and counted rather than silently
   dropped. They contain literal tab characters inside free text fields,
   producing more fields than the file's own header declares.
+- **The late-filing rate is a range, not a number.** Rule 12b-25 grants an
+  automatic extension that the source data cannot confirm was invoked, because
+  Form 12b-25 carries no XBRL. Newly public companies, transition reports and
+  federal holidays are three further deadline exceptions not modelled;
+  [`docs/findings.md`](docs/findings.md) §3.5 measures the last of them.
+- **The point-in-time comparison rests on four tags and one cutoff date.**
+  Revenue under three tags plus `NetIncomeLoss`, consolidated, USD, annual. The
+  103 is what eighteen months of subsequent filings did to one fiscal year seen
+  from 2024-06-30; no sensitivity across other cutoffs was run.
+- **The 0.11–0.13 AUC gap belongs to these two constructions, not to leakage in
+  general.** A naive table that leaked through fewer features would show less; one
+  with more full-window aggregates would show more. The test period is six
+  months, and the point-in-time model is additionally handicapped by a sector-rate
+  warm-up that a longer loaded range would remove.
 
 ## Source
 

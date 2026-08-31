@@ -18,6 +18,17 @@ vars:
   # records how the restatement rate moves with it.
   restatement_rounding_threshold: 0.001
 
+  # How long a filing is watched before its restatement label is fixed. The
+  # loaded range ends 2025-12-31, so a filing from late 2025 has almost no time
+  # to be revised: measured without a horizon, the share of 10-K and 10-Q
+  # filings ever restated falls from 62.1% in 2023Q1 to 0.7% in 2025Q4, which is
+  # elapsed observation time rather than a change in filer behaviour. A fixed
+  # horizon makes the label mean the same thing in every quarter, at the cost of
+  # dropping filings within one horizon of the end of the range. 180 days is a
+  # judgement call: long enough to catch the amendment season that follows an
+  # annual report, short enough to leave three quarters of 2025 testable.
+  restatement_label_horizon_days: 180
+
 models:
   sec_restatement:
     staging:
