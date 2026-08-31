@@ -11,7 +11,7 @@
   Sector is the SIC on the dim_company version current when the fact was first
   published, never the filer's present-day SIC, so a company that reclassified
   is counted under the industry it reported from at the time. Count alone
-  answers nothing — a large sector restates more by filing more — so the same
+  answers nothing, a large sector restates more by filing more, so the same
   as-at rule attributes the denominators too.
 */
 

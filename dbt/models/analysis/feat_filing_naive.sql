@@ -32,7 +32,7 @@
   was not surveyed. Two of the four are the path of least resistance: is_current
   is the easy join and a whole-window group by is the easy aggregate. The
   prior_restatement_count construction is harder to defend that way, because the
-  identifier says "prior" and the code does not — and that is the one carrying
+  identifier says "prior" and the code does not, and that is the one carrying
   the effect. Read the gap as what these two constructions are worth, not as a
   general price for leakage.
 

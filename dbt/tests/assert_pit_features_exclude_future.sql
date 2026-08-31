@@ -4,8 +4,8 @@
 -- but is not obviously correct by inspection: the strictly-prior semantics rest
 -- entirely on query rows sorting before same-day events.
 --
--- So both are recomputed here the slow, obvious way — a range join with the date
--- predicate written out — and compared. The recomputation is done once per
+-- So both are recomputed here the slow, obvious way, a range join with the date
+-- predicate written out, and compared. The recomputation is done once per
 -- distinct query point rather than once per filing, which is what keeps an exact
 -- check over 58,726 rows from becoming a quadratic scan.
 --

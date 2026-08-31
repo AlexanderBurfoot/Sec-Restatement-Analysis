@@ -14,7 +14,7 @@
   A restatement is one described fact reported at two different values by two
   filings published on different dates. The partition is what the fact
   describes; the ordering is when it was published. adsh is deliberately absent
-  from the partition — comparing across filings is the entire mechanism.
+  from the partition, comparing across filings is the entire mechanism.
 
   segments and coregistrant are in the partition, and they are load-bearing.
   Without segments a segment-level figure is compared against the consolidated

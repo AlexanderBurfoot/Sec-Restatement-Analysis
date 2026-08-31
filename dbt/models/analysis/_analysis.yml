@@ -301,7 +301,7 @@ models:
     description: >
       One row per filer, distinguishing sustained restatement from scattered
       restatement. Islands are computed over the company's own reporting
-      timeline — the quarters it actually filed for, taken from dim_filing — so
+      timeline, the quarters it actually filed for, taken from dim_filing, so
       a gap in the run means the company did not report then, not that it
       reported cleanly. Restated periods falling outside that timeline are
       excluded from the run logic on purpose, since a 2023 filing revising a
@@ -368,7 +368,7 @@ models:
     description: >
       Restatement rate against two measures of filer size, stacked in one table
       because they disagree. The SEC's regulatory bands (sub.afs) grade
-      monotonically — non-accelerated filers restate at 5.43% of revisable facts
+      monotonically, non-accelerated filers restate at 5.43% of revisable facts
       against 4.06% for large accelerated, and their median revision is 85% of
       the originally reported value against 16%. Deciles of consolidated total
       assets do not grade: the rate falls from 8.07% in the second decile to
@@ -379,7 +379,7 @@ models:
 
       The segment and sector splits are columns rather than separate models, so
       the reversal can be read off a single row. Both were run as controls
-      against it — large filers report proportionally more segment-level facts
+      against it, large filers report proportionally more segment-level facts
       (58% of revisable groups in the top decile against 40% in the bottom) and
       skew financial (37% against 13%), so either mix could have produced the
       uptick on its own. Neither does: the same shape appears inside the
@@ -497,7 +497,7 @@ models:
       whose original was filed before 2023-01-03 have nothing in range to match,
       which is why n_amendments and n_matched_to_original are both reported.
       n_flagged_later_amended and n_observed_amended disagree in the same
-      direction throughout — the prevrpt flag counts fewer amended originals
+      direction throughout, the prevrpt flag counts fewer amended originals
       than are actually observed being amended. Staleness of the flag is
       hypothesised, not established: the share of amended originals carrying the
       flag falls from 70.8% where the amendment arrived within 90 days to 41.8%
@@ -534,8 +534,8 @@ models:
     description: >
       One row per company, ranking filers by how much margin they leave against
       their own statutory deadline. Days of lag are not comparable across filer
-      statuses because the deadline is not — 10-K is 60/75/90 days and 10-Q is
-      40/40/45 by accelerated filer status — so each filing is measured against
+      statuses because the deadline is not, 10-K is 60/75/90 days and 10-Q is
+      40/40/45 by accelerated filer status, so each filing is measured against
       its own due date, rolled forward over weekends per Rule 0-3(a). Federal
       holidays are not modelled because dim_date does not carry them; the effect
       is one-sided and small, understating a handful of due dates by a day.
@@ -559,8 +559,8 @@ models:
       The model the two-date mechanic exists to justify. Net margin and revenue
       growth percentiles are computed within SIC major group twice over the
       identical companies and the identical fiscal year: once using only what
-      was knowable on 2024-06-30 — facts filed strictly before it, and the SIC
-      on the dim_company version current then — and once using every filing in
+      was knowable on 2024-06-30, facts filed strictly before it, and the SIC
+      on the dim_company version current then, and once using every filing in
       the loaded range and the current SIC. The fiscal period is chosen once
       from the point-in-time view and both sides are pinned to it, so a
       restatement is never compared against a newer annual period. The
@@ -595,7 +595,7 @@ models:
       window: originals only, and nothing filed within one label horizon of the
       end of the loaded range, because a filing still being watched cannot be
       labelled clean. A filing is restated if it published a consolidated figure
-      — segments and coregistrant both empty — that a later filing revised
+      with segments and coregistrant both empty, that a later filing revised
       within restatement_label_horizon_days of it. The horizon is what makes the
       label mean the same thing in every quarter: measured without one, the share
       of filings ever restated falls from 62.1% in 2023Q1 to 0.7% in 2025Q4, and
@@ -627,7 +627,7 @@ models:
       other two have a history and it is respected: prior_restatement_count
       admits a revision on the day that revision was published, and
       sector_restatement_rate is an expanding window over filings of the same SIC
-      major group — as recorded on the dim_company version current at filing —
+      major group, as recorded on the dim_company version current at filing , 
       whose own observation window had already closed. Dating the sector
       contribution at filed_date plus the horizon rather than at filed_date is
       what keeps filings still being watched out of the denominator as clean
@@ -661,7 +661,7 @@ models:
       prior_restatement_count counts the company's revised filings across the
       whole range, the scored filing included, with a test-split median of 7 for
       restated filings against 4 for clean ones. How much of this a working
-      modeller would actually write is hypothesised and was not surveyed — two of
+      modeller would actually write is hypothesised and was not surveyed, two of
       the four are the path of least resistance, but the prior_restatement_count
       construction is harder to defend that way and is the one carrying almost
       all of the measured gap. A missing date predicate is also not the whole

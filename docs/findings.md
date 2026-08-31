@@ -1266,43 +1266,42 @@ correction is not separable in this data.
 
 ### 2.7 Verification
 
-§1.9's most defensible result came from checking a rule and finding it over-flagged
-by 60×. The same skepticism is applied here, and it finds less than that but not
-nothing.
+§1.9 checked a rule and found it over-flagged by 60×. The same check runs here.
+It finds less than that, but not nothing.
 
-**Method.** Twenty restatements were drawn from the 426,706 in reproducible order
-(`order by md5(restatement_sk) limit 20`) and each one's full report sequence was
-pulled from `fct_financial_fact` and inspected against `dim_filing` for form type
-and fiscal period. The question asked of each was not "is this row correct" but
-"did the filer actually publish a different number for the same described fact,
-and does calling it a restatement mean what a reader would assume".
+Twenty restatements were drawn from the 426,706 in reproducible order (`order by
+md5(restatement_sk) limit 20`). Each one's full report sequence was pulled from
+`fct_financial_fact` and read against `dim_filing` for form type and fiscal
+period. The question was not whether the row was correct. It was whether the
+filer actually published a different number for the same described fact, and
+whether calling that a restatement means what a reader would assume.
 
 | Verdict | Count |
 |---|---|
 | Genuine revision of the reported figure | 14 |
-| Genuine change, but retroactive re-presentation rather than correction | 3 |
+| Genuine change, but re-presentation rather than correction | 3 |
 | Artefact, the underlying figure did not change | 3 |
 
-**17 of 20 held up as real changes in what the filer published. 14 of 20 held up
-as corrections** in the sense the word normally carries.
+Seventeen of twenty held up as real changes in what the filer published.
+Fourteen held up as corrections in the sense the word normally carries.
 
-**The clean cases.** Several are textbook and need no interpretation. Nutex Health
-restated FY2024 stockholders' equity from $146,344,749 to $132,437,993 in a 10-K/A
-(−9.5%). Cellectar Biosciences restated FY2023 non-operating income from +$917,147
-to −$3,869,967 in a 10-K/A, a sign reversal. Faraday Future restated Q1-2023
-related-party notes from $8,643,000 to $9,201,000 in a 10-Q/A. Elvictor Group
-revised Q2-2024 net income from $32,701 to $32,071, a digit transposition,
-corrected in the next 10-Q.
+Several are textbook. Nutex Health restated FY2024 stockholders' equity from
+$146,344,749 to $132,437,993 in a 10-K/A, down 9.5%. Cellectar Biosciences
+restated FY2023 non-operating income from +$917,147 to −$3,869,967, a sign
+reversal. Faraday Future restated Q1-2023 related-party notes from $8,643,000 to
+$9,201,000. Elvictor Group revised Q2-2024 net income from $32,701 to $32,071, a
+digit transposition, corrected in the next 10-Q.
 
-**Three artefacts, and each represents a measurable class.**
+The three artefacts each turned out to represent a measurable class.
 
-*Exact scale changes.* BC Partners Lending reported an investment at fair value of
-**4,064** in its Q1-2023 10-Q and **4,064,000** in every filing thereafter, the
-same digits, a factor of exactly 1,000. The filer changed reporting scale; the
-holding did not change value. Across the population, **11,846 restatements (2.78%)
-have an exact power-of-ten ratio** between first and latest value. This is also
-what puts the p99 of the "all" direction at exactly 999.0, a ×1000 scale change
-expressed as a percentage.
+**Exact scale changes.** BC Partners Lending reported an investment at fair value
+of 4,064 in its Q1-2023 10-Q and 4,064,000 in every filing after. Same digits, a
+factor of exactly 1,000. The filer changed reporting scale. The holding did not
+change value.
+
+Across the population, 11,846 restatements (2.78%) have an exact power-of-ten
+ratio between first and latest value. This is also what puts the p99 of the "all"
+direction at exactly 999.0: a ×1000 scale change expressed as a percentage.
 
 | Scale factor | Restatements |
 |---|---|
@@ -1314,24 +1313,29 @@ expressed as a percentage.
 | ×100 | 179 |
 | **Total** | **11,846 (2.78%)** |
 
-*Precision re-reporting.* HPS Corporate Capital Solutions reported Q1 2024 trustee
-fees of **$55,943**, then **$56,000** a year later, a 0.102% "revision" that clears
-the 0.1% threshold by two thousandths of a percent. Barnes & Noble Education is the
-same defect inverted: treasury shares of **27,000** in two 10-Qs, then **27,267** in
-the 10-K. Checking that filer's other treasury-share reports settles it. Every one
-is a round thousand (3,842,000; 1,948,000; 2,188,000; 2,426,000; 2,533,000), so
-27,000 is a rounded report and 27,267 is the exact one. The underlying count did not
-move. Across the population, of the 49,088 restatements below 1%, **4,420 have a
-later value that is an exact multiple of 1,000 where the first value is not**,
-against only **334 the other way round** a 13× asymmetry that is hard to explain
-as anything but precision changes being read as revisions.
+**Precision re-reporting.** HPS Corporate Capital Solutions reported Q1 2024
+trustee fees of $55,943, then $56,000 a year later. That is a 0.102% "revision",
+clearing the 0.1% threshold by two thousandths of a percent.
 
-*Retroactive share splits.* Brain Scientific's diluted share count went from
+Barnes & Noble Education is the same defect inverted: treasury shares of 27,000
+in two 10-Qs, then 27,267 in the 10-K. That filer's other treasury-share reports
+settle which is which. Every one is a round thousand: 3,842,000; 1,948,000;
+2,188,000; 2,426,000; 2,533,000. So 27,000 is the rounded report and 27,267 is
+the exact one, and the underlying count never moved.
+
+Of the 49,088 restatements below 1%, 4,420 have a later value that is an exact
+multiple of 1,000 where the first value is not, against only 334 the other way
+round. A 13× asymmetry is hard to explain as anything but precision changes being
+read as revisions.
+
+**Retroactive share splits.** Brain Scientific's diluted share count went from
 29,520,454 to 347,333, a ratio of exactly 85.0. Luminar Technologies reported
-291,942,087 common shares outstanding in eight consecutive filings, then 19,444,545
-in the ninth: a ratio of 15.014, a 1-for-15 reverse split applied retroactively.
-FangDD Network is the decisive case, because it happened to all three share classes
-at once:
+291,942,087 common shares outstanding in eight consecutive filings, then
+19,444,545 in the ninth: a ratio of 15.014, a 1-for-15 reverse split applied
+retroactively.
+
+FangDD Network is decisive, because it happened to all three share classes at
+once:
 
 | Class | 2024-04-19 | 2025-04-23 | 2025-09-29 |
 |---|---|---|---|
@@ -1339,18 +1343,20 @@ at once:
 | B | 490,418,360 | 87,186 | 5,450 |
 | C | 7,071,427 | 1,258 | 79 |
 
-The ratios are identical across all three classes. 5,625 then 16, which no
-error correction produces. These are two successive share consolidations.
+The ratios are identical across all three: 5,625, then 16. No error correction
+produces that. These are two successive share consolidations.
 
-Tested across the population: **47.05% of share-denominated restatements carry a
-near-integer shrink ratio between 1.5 and 10,000, against 2.45% of USD-denominated
-ones** a 19× enrichment over the base rate. Share counts are 11.87% of all
-restatements with a median revision of 96%, and that median is a split artefact,
-not a measure of error.
+Across the population, 47.05% of share-denominated restatements carry a
+near-integer shrink ratio between 1.5 and 10,000, against 2.45% of
+USD-denominated ones. That is a 19× enrichment. Share counts are 11.87% of all
+restatements with a median revision of 96%, and that median is a split artefact
+rather than a measure of error.
 
-**A fourth class the sample missed, found by following the magnitude tail.**
-Restatements denominated in Argentine pesos number 9,725 (2.28% of the total) with
-a median revision of 211% and 80–91% upward. They are concentrated in five issuers:
+#### A fourth class, found by following the magnitude tail
+
+Restatements denominated in Argentine pesos number 9,725, 2.28% of the total,
+with a median revision of 211% and 80 to 91% upward. Five issuers carry almost
+all of them:
 
 | Company | Restatements | Median revision | % upward |
 |---|---|---|---|
@@ -1360,39 +1366,39 @@ a median revision of 211% and 80–91% upward. They are concentrated in five iss
 | GAS TRANSPORTER OF THE SOUTH INC | 714 | 211.4% | 81.9 |
 | TELECOM ARGENTINA SA | 687 | 211.4% | 71.9 |
 
-Four of the five share a median of **exactly 211.4%**, which is the signature of a
-common index rather than of independent errors. This is **IAS 29 hyperinflation
-accounting**: Argentine issuers are required to restate prior-period figures into
-current purchasing power every reporting period. It is mandatory re-presentation,
-the opposite of a control failure, and it explains why Grupo Financiero Galicia
-tops the §2.5 chain concentration with 979 long chains.
+Four of the five share a median of exactly 211.4%. That is the signature of a
+common index, not of independent errors. It is IAS 29 hyperinflation accounting:
+Argentine issuers must restate prior-period figures into current purchasing power
+every reporting period. Mandatory re-presentation, the opposite of a control
+failure, and it explains why Grupo Financiero Galicia tops the §2.5 chain
+concentration with 979 long chains.
 
-**Four checks run across the whole population, not sampled.** Everything above was
-found by sampling and then measured. These four were defined first and counted
-directly, so they carry no sampling error: each is a closed predicate over
-`int_restatements`, and the first three are **mutually disjoint**, no restatement
-is counted twice.
+#### Four checks across the whole population
+
+Everything above was found by sampling and then measured. These four were defined
+first and counted directly, so they carry no sampling error. Each is a closed
+predicate over `int_restatements`, and the first three are mutually disjoint.
 
 | Category | Predicate | Restatements | % of 426,706 |
 |---|---|---|---|
 | Zero-origin | `first_reported_value = 0` | 6,950 | 1.63 |
-| Extreme magnitude | `abs(pct_revision) > 100` (>10,000%) | 10,061 | 2.36 |
+| Extreme magnitude | `abs(pct_revision) > 100` | 10,061 | 2.36 |
 | Sign flip | `first_reported_value = -latest_reported_value` | 29,118 | 6.82 |
 | **Union (disjoint)** | | **46,129** | **10.81** |
 
-**Roughly one restatement in nine is identifiable from the values alone as a
+Roughly one restatement in nine is identifiable from the values alone as a
 reclassification, a rescaling or a sign correction rather than a revision of a
-value.** The fourth check is not a class of rows but a test of the §2.2 direction
+value. The fourth check is not a class of rows but a test of §2.2's direction
 result against the other three.
 
-*Zero-origin (6,950).* A fact first published as zero and later at a non-zero
+**Zero-origin (6,950).** A fact first published as zero and later at a non-zero
 value. There is no denominator, so these carry no `pct_revision` and sit outside
-every magnitude statistic. The dominant mechanism is **reclassification into a
-line that previously did not exist**, and discontinued operations is the clearest
-case: 860 of the 6,950 carry a tag naming discontinued operations.
+every magnitude statistic. The dominant mechanism is reclassification into a line
+that previously did not exist. Discontinued operations is the clearest case: 860
+of the 6,950 carry a tag naming them.
 
 General Electric is the worked example, because the arithmetic closes. Financing
-cash flow from discontinued operations for FY2022:
+cash flow from discontinued operations, FY2022:
 
 | Filed | Form | Discontinued ops | Continuing ops | Total financing |
 |---|---|---|---|---|
@@ -1401,38 +1407,41 @@ cash flow from discontinued operations for FY2022:
 | 2024-02-02 | 10-K | 8,102,000,000 | −13,688,000,000 | −5,585,000,000 |
 | 2025-02-03 | 10-K | 7,955,000,000 | −13,540,000,000 | −5,585,000,000 |
 
-**The total never moves.** GE spun off GE HealthCare in January 2023 and recast
+The total never moves. GE spun off GE HealthCare in January 2023 and recast
 FY2022 into discontinued-operations presentation in the 8-K that April. The
 discontinued line moves from 0 to +8,102,000,000 and the continuing line moves by
-−8,103,000,000 offsetting to within one million dollars of GE's own rounding.
-Not one figure about 2022 changed; the partition of an unchanged total between two
-tags changed. Note also that this single event produces **two** rows in
-`int_restatements`, one on each tag: a reclassification inflates the count by as
-many tags as it touches.
+−8,103,000,000, offsetting to within one million dollars of GE's own rounding.
+Not one figure about 2022 changed. What changed was the partition of an unchanged
+total between two tags.
 
-The class is not uniformly artefactual, and the honest reading is narrower than
+Note that this single event produces two rows in `int_restatements`, one on each
+tag. A reclassification inflates the count by as many tags as it touches.
+
+The class is not uniformly artefactual and the honest reading is narrower than
 "all reclassification". Merck's FY2023 acquired-IPR&D write-off is reported as 0
-in the FY2023 10-K and $11,409,000,000 in the FY2024 10-K; nothing here shows
-whether that is a repartition like GE's or a figure the first filing simply did not
-break out, and *no offsetting counterpart was sought for it*. What the whole class
-does share is that **none of these is a filer changing its mind about a number's
-magnitude**, which is what "restatement" implies to a reader. 6,233 of the 6,950 are USD, 446 share counts; the median arrives at 364
+in the FY2023 10-K and $11,409,000,000 in the FY2024 10-K. Nothing here shows
+whether that is a repartition like GE's or a figure the first filing simply did
+not break out, and no offsetting counterpart was sought for it. What the class
+does share is that none of these is a filer changing its mind about a number's
+magnitude, which is what "restatement" implies to a reader.
+
+6,233 of the 6,950 are USD and 446 are share counts. The median arrives at 364
 days, matching the population.
 
-*Extreme magnitude (10,061).* Revisions exceeding 10,000% of the original. A
-figure genuinely wrong by two orders of magnitude and surviving audit is rare; a
-figure whose *scale, unit or share basis* changed is not. Three mechanisms account
-for most of the bucket, and **5,358 of the 10,061 (53%) have an exact power-of-ten
-ratio** between first and latest value, the single strongest signature that no
-economic quantity moved.
+**Extreme magnitude (10,061).** Revisions exceeding 10,000% of the original. A
+figure genuinely wrong by two orders of magnitude and surviving audit is rare. A
+figure whose scale, unit or share basis changed is not. Three mechanisms account
+for most of the bucket, and 5,358 of the 10,061 (53%) have an exact power-of-ten
+ratio between first and latest value, which is the strongest available signature
+that no economic quantity moved.
 
-Kamada Ltd is the cleanest rescaling. Between its 6-K of 2023-11-13 and its 6-K of
-2024-11-13, **145 of 151 restatements are a factor of exactly 1,000, across 82
-distinct tags** assets 337,056 → 337,056,000, additional paid-in capital
-265,700 → 265,700,000. One filer changed its reporting scale from thousands to
-units and contributed 145 rows to the population, none of them a changed fact.
+Kamada Ltd is the cleanest rescaling. Between its 6-K of 2023-11-13 and its 6-K
+of 2024-11-13, 145 of 151 restatements are a factor of exactly 1,000, across 82
+distinct tags: assets 337,056 → 337,056,000, additional paid-in capital 265,700 →
+265,700,000. One filer changed its reporting scale from thousands to units and
+contributed 145 rows, none of them a changed fact.
 
-Aditxt is the per-share mechanism, and it is self-proving because the denominator
+Aditxt is the per-share mechanism, and it proves itself because the denominator
 is in the dataset too:
 
 | Filed | Form | Diluted EPS | Weighted average diluted shares |
@@ -1440,26 +1449,28 @@ is in the dataset too:
 | 2024-05-20 | 10-Q | −9.21 | 1,610,872 |
 | 2025-05-15 | 10-Q | −91,439.43 | 161 |
 
-The share count shrinks by 10,005× and the loss per share grows by 9,928× the
-same ratio to within 0.8%, which is the rounding of a two-decimal EPS. This is a
-reverse split applied retroactively to Q1-2024 comparatives. It registers as a
-992,700% "restatement" of EPS. **This extends the split finding above**, which
-measured splits only on share-count units: the same event re-presents every
-per-share figure as well, and 1,176 of the extreme bucket are per-share tags
-against 2,938 share counts.
+The share count shrinks by 10,005× and the loss per share grows by 9,928×, the
+same ratio to within 0.8%, which is the rounding of a two-decimal EPS. A reverse
+split applied retroactively to Q1-2024 comparatives, registering as a 992,700%
+"restatement" of EPS.
 
-The third mechanism is reclassification off a near-zero base, AIG reported FY2022
+This extends the split finding above. That one measured splits only on
+share-count units, but the same event re-presents every per-share figure as well.
+1,176 of the extreme bucket are per-share tags against 2,938 share counts.
+
+The third mechanism is reclassification off a near-zero base. AIG reported FY2022
 income from discontinued operations as −$1,000,000 in the 10-Ks of 2023 and 2024,
 then $8,383,000,000 in the 10-K of 2025-02-13, on deconsolidating Corebridge. The
 value moved by 838,400% because the base was a rounding artefact, not because the
 figure was wrong by that much. Percentage revision is not a meaningful statistic
-when the denominator is one rounding unit, and 2,396 of the extreme bucket are
-decreases against 7,665 increases the asymmetry a near-zero base produces.
+when the denominator is one rounding unit. 2,396 of the extreme bucket are
+decreases against 7,665 increases, which is the asymmetry a near-zero base
+produces.
 
-*Sign flips (29,118).* `first_reported_value = -latest_reported_value` exactly:
-the magnitude is **bit-identical** and only the sign changed. This is the most
-mechanical category in the report, it is not an approximation or a threshold, it
-is an equality, and at 6.82% it is the largest of the three.
+**Sign flips (29,118).** `first_reported_value = -latest_reported_value` exactly.
+The magnitude is bit-identical and only the sign changed. This is the most
+mechanical category in the report. It is not an approximation or a threshold but
+an equality, and at 6.82% it is the largest of the three.
 
 | Company | Tag | Period | First | Latest |
 |---|---|---|---|---|
@@ -1470,34 +1481,33 @@ is an equality, and at 6.82% it is the largest of the three.
 
 Crown Castle reported $850m of interest expense in its FY2023 10-K and −$850m for
 the same period in its FY2024 10-K. Interest expense did not become interest
-income. The **element's sign convention** changed, whether an expense is tagged
+income. The element's sign convention changed: whether an expense is tagged
 positive as a cost or negative as a deduction. XBRL permits both, and
 `negatedLabel` presentation reverses the displayed sign, so the rendered statement
 can look identical either way while the tagged value flips.
 
-The tag distribution confirms it: the concentration is in exactly the concepts
-whose sign convention is contested, `IncomeTaxExpenseBenefit` (763, expense or
+The tag distribution confirms it. The concentration sits in exactly the concepts
+whose sign convention is contested: `IncomeTaxExpenseBenefit` (763, expense or
 benefit), `IncreaseDecreaseInAccountsReceivable` (308) and
 `IncreaseDecreaseInInventories` (284, working-capital movements presented as the
 change or as its cash effect), `StockRepurchasedAndRetiredDuringPeriodValue`
-(279). And **29,045 of the 29,118 have exactly two distinct values** a single
-flip and no further movement, which is what a one-time convention change looks
-like and not what an error under correction looks like.
+(279). And 29,045 of the 29,118 have exactly two distinct values, a single flip
+with no further movement, which is what a one-time convention change looks like
+and not what an error under correction looks like.
 
-Not every flip is a convention change, and the sample says so. Edgewell's operating
-cash flow is in the table above, and the sign of operating cash flow is *not* a
-contested convention, so that row is either a tagging error or a genuine sign
-correction, and the values cannot say which. The claim the category supports is
-narrower than "all 29,118 are conventions": it is that **in none of them did the
-reported magnitude change**, so none of them is a revision of a value, whatever
-else it is.
+Not every flip is a convention change, and the sample says so. Edgewell's
+operating cash flow is in the table above, and the sign of operating cash flow is
+not a contested convention, so that row is either a tagging error or a genuine
+sign correction. The values cannot say which. The claim the category supports is
+narrower than "all 29,118 are conventions". It is that in none of them did the
+reported magnitude change, so none is a revision of a value, whatever else it is.
 
-*Direction, tested against the other three (the fourth check).* §2.2 reports
-57.76% of revisions as reductions. A sign flip has an identical magnitude, so
-calling it an "increase" or a "decrease" is meaningless, `revision_direction`
-reads the sign of `absolute_revision`, which for a flip is entirely an artefact of
-the convention that changed. If the downward skew were manufactured by these
-categories, removing them would collapse it.
+**Direction, tested against the other three.** §2.2 reports 57.76% of revisions
+as reductions. A sign flip has an identical magnitude, so calling it an increase
+or a decrease is meaningless. `revision_direction` reads the sign of
+`absolute_revision`, which for a flip is entirely an artefact of the convention
+that changed. If the downward skew were manufactured by these categories,
+removing them would collapse it.
 
 | Population | Restatements | % downward |
 |---|---|---|
@@ -1508,71 +1518,74 @@ categories, removing them would collapse it.
 | Zero-origin alone | 6,950 | 25.94 |
 | Extreme magnitude alone | 10,061 | 23.81 |
 
-**The skew is robust, and the artefacts were working against it.** Sign flips are
-near-balanced at 47.54% downward, which is what a convention change should look
-like, it has no reason to prefer a direction. Zero-origin and extreme-magnitude
-restatements are strongly *upward* (74% and 76%), because both are dominated by
-values rising off a zero or near-zero base. Removing all three therefore **raises**
-the downward share from 57.76% to 60.02%. The direction finding does not depend on
-the contaminated rows; it is diluted by them.
+It does not collapse. It strengthens. Sign flips are near-balanced at 47.54%
+downward, which is what a convention change should look like, since it has no
+reason to prefer a direction. Zero-origin and extreme-magnitude restatements are
+strongly upward, 74% and 76%, because both are dominated by values rising off a
+zero or near-zero base. Removing all three raises the downward share from 57.76%
+to 60.02%. The direction finding does not depend on the contaminated rows. It was
+diluted by them.
 
 *Root cause: established for sign flips and rescalings, hypothesised for
 zero-origin.* Bit-identical magnitudes and exact power-of-ten ratios are
-signatures no error process produces, and the Aditxt and GE cases are confirmed by
-an independent series in the same dataset. The zero-origin attribution to
+signatures no error process produces, and the Aditxt and GE cases are confirmed
+by an independent series in the same dataset. The zero-origin attribution to
 reclassification rests on the GE arithmetic and the discontinued-operations tag
-concentration, which is strong but is one worked case, not a population test.
+concentration. Strong, but one worked case rather than a population test.
 
-**Aggregate effect on the headline.** Seven classes are now quantified, from two
-methods, three found by sampling and then measured, three defined first and
-counted directly, plus the split class. They overlap, so they cannot be added.
-Measured against each other:
+#### Aggregate effect on the headline
 
-| Class | Found by | Restatements | Overlap with the four-category tests |
+Seven classes are now quantified from two methods: three found by sampling and
+then measured, three defined first and counted directly, plus the split class.
+They overlap, so they cannot be added.
+
+| Class | Found by | Restatements | Overlap with the direct counts |
 |---|---|---|---|
 | Sign flips | direct count | 29,118 | (disjoint) |
-| Extreme magnitude (>10,000%) | direct count | 10,061 | (disjoint) |
+| Extreme magnitude | direct count | 10,061 | (disjoint) |
 | Zero-origin | direct count | 6,950 | (disjoint) |
-| Power-of-ten scale changes | sampling | 11,846 | 4,778 sit inside the extreme bucket |
+| Power-of-ten scale changes | sampling | 11,846 | 4,778 inside the extreme bucket |
 | IAS 29 re-presentation (ARS) | sampling | 9,725 | 40 |
 | Sub-1% precision re-reports | sampling | ~4,420 | none |
-| **Union of the above** | | **~69,500** | **16.3% of the population** |
+| **Union** | | **~69,500** | **16.3% of the population** |
 
-The union is approximate in its last figure and the reason is stated rather than
-smoothed over: reproducing the scale-change predicate at the tolerance used for the
-direct counts returns 14,044 rather than the 11,846 tabulated above, so the union
-sits between roughly 67,000 and 69,500. **Call it 16% of the population, give or
-take half a point.**
+The union's last figure is approximate and the reason is worth stating rather
+than smoothing over. Reproducing the scale-change predicate at the tolerance used
+for the direct counts returns 14,044 rather than the 11,846 tabulated above, so
+the union sits between roughly 67,000 and 69,500. Call it 16% of the population,
+give or take half a point.
 
 Retroactive share splits (23,839) are disjoint from all three directly counted
-categories, a split on a share *count* is a shrink of less than 100%, so it can
+categories. A split on a share count is a shrink of less than 100%, so it can
 never enter the extreme bucket, and they stay out of the union because they are
-genuine changes to a published figure rather than artefacts. Their per share
-counterparts are a different matter: the Aditxt case shows the same split event
-re-presenting EPS as a five figure percentage, and those 1,176 per-share rows *are*
+genuine changes to a published figure rather than artefacts. Their per-share
+counterparts are different: the Aditxt case shows the same split event
+re-presenting EPS as a five-figure percentage, and those 1,176 per-share rows are
 inside the extreme bucket.
 
-**Removing the artefact union moves the headline rate from 4.785% to
-approximately 4.01%.** That is the ceiling on the false positive correction, and it
-is materially larger than the 6.1% this section reached from sampling alone. The
-direct counts found more than the sample did, which is the expected direction and
-the reason they were run.
+Removing the artefact union moves the headline rate from 4.785% to approximately
+4.01%. That is the ceiling on the false-positive correction, and it is materially
+larger than the 6.1% this section reached from sampling alone. The direct counts
+found more than the sample did, which is the expected direction and the reason
+they were run.
 
-**The headline finding survives verification.** The rate is not over flagged by
-anything like §1.9's 60× a 16% correction leaves a restatement rate near 4%,
-still low single digits, still the shape the design predicted. Two results survive
-in different ways. The **direction** result strengthens: the artefact classes were
-diluting the downward skew rather than creating it, and removing all three raises
-reductions from 57.76% to 60.02%. The **magnitude** distribution in §2.2 does not
-survive unqualified, the mass above 90% is substantially re-presentation rather
-than correction, and §2.2 is written accordingly.
+The headline finding survives. A 16% correction leaves a restatement rate near
+4%, still low single digits, still the shape the design predicted. Nothing like
+§1.9's 60×.
+
+Two results survive in different ways. The direction result strengthens: the
+artefact classes were diluting the downward skew rather than creating it, and
+removing all three raises reductions from 57.76% to 60.02%. The magnitude
+distribution in §2.2 does not survive unqualified. The mass above 90% is
+substantially re-presentation rather than correction, and §2.2 is written
+accordingly.
 
 **What verification did not cover.** Nothing was checked against the original
-filings on EDGAR; all inspection was against the loaded data, so a sequence that is
-internally coherent may still misrepresent what the filer submitted. Twenty is a
-small sample against 426,706 and supports classification of failure *modes*, not a
-precise false-positive rate, the population-level tests above are what carry the
-percentages. No attempt was made to distinguish a correction from a
+filings on EDGAR. All inspection was against the loaded data, so a sequence that
+is internally coherent may still misrepresent what the filer submitted. Twenty is
+a small sample against 426,706 and supports classification of failure modes
+rather than a precise false-positive rate; the population-level tests are what
+carry the percentages. No attempt was made to distinguish a correction from a
 reclassification where the values give no signature, which §2.8 records as a
 structural limit rather than a sampling one.
 

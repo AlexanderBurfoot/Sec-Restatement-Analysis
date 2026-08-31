@@ -17,7 +17,7 @@
 
   Both are built the same way: the filings are unioned with their own events into
   one stream, sorted once, and read off a running sum. Query rows sort before
-  same-day events, which is what makes the window strictly prior — a filing never
+  same-day events, which is what makes the window strictly prior, a filing never
   sees a revision published on its own filing date, and never sees itself.
 
   A lateral as-of lookup per filing was the obvious alternative and was not
@@ -46,7 +46,7 @@ sector_stream as (
     -- because that is when the filing's outcome stopped being provisional.
     -- Counting a filing from its filing date would put filings still inside
     -- their observation window into the denominator as clean ones and bias
-    -- every sector rate downward — the same censoring the horizon exists to
+    -- every sector rate downward, the same censoring the horizon exists to
     -- remove, reintroduced through the feature.
     select
         sic_major_group_at_filing               as sic_major_group,
@@ -186,7 +186,7 @@ select
     -- where nothing has resolved in them yet, which is early 2023 for everyone
     -- and permanently for the 2.5% of filings with no numeric SIC. The market
     -- rate itself is zero on the first horizon of the range, where nothing at
-    -- all has resolved — a genuine absence of information, and one that only
+    -- all has resolved, a genuine absence of information, and one that only
     -- affects training rows.
     coalesce(
         case

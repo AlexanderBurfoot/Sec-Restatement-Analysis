@@ -15,7 +15,7 @@
   it published a consolidated figure that a later filing revised within
   {{ var('restatement_label_horizon_days') }} days of it. Filings within one
   horizon of the end of the loaded range have no complete observation window and
-  are not in the population at all — labelling them zero would record an
+  are not in the population at all, labelling them zero would record an
   unfinished wait as a clean filing.
 
   Consolidated means segments and coregistrant both empty. Segment-level and

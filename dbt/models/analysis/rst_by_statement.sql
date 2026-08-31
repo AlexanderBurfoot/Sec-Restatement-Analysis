@@ -8,8 +8,8 @@
 /*
   Which line items get revised, and on which financial statement do they sit?
 
-  int_restatements is keyed on tag without taxonomy_version — deliberately, so
-  the same concept under us-gaap/2023 and us-gaap/2024 stays one fact — while
+  int_restatements is keyed on tag without taxonomy_version, deliberately, so
+  the same concept under us-gaap/2023 and us-gaap/2024 stays one fact, while
   dim_tag is keyed on both. The dictionary is therefore collapsed to tag grain
   here, and a tag presented on more than one statement is flagged rather than
   quietly assigned to one.

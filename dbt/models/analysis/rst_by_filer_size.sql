@@ -11,7 +11,7 @@
   Two size measures, stacked in one table because they disagree and the
   disagreement is the finding. The regulatory bands (sub.afs, a public-float
   threshold) grade monotonically: smaller filers restate more. Deciles of total
-  assets do not — the rate falls from the second decile to the ninth and then
+  assets do not, the rate falls from the second decile to the ninth and then
   turns back up at the largest. The regulatory cut cannot show that, because a
   single band spans the whole of the reversal: 1-LAF is 45% of the seventh
   decile and 85% of the tenth, so the fall and the rise are averaged together
@@ -21,8 +21,8 @@
   models so the reversal can be read off a single row. They are the two controls
   that were run against it: large filers report a far higher share of
   segment-level facts, and skew financial, so either could have produced the
-  uptick as a composition effect. Neither does — the shape survives inside both
-  splits — but the uptick is concentrated in large financials, which is a
+  uptick as a composition effect. Neither does, the shape survives inside both
+  splits, but the uptick is concentrated in large financials, which is a
   hypothesis about where it lives, not a tested cause.
 
   Size is measured from each company's most recent reported period, not as-at
@@ -116,7 +116,7 @@ revisable_groups as (
     -- capable of being revised. Same population and same key int_restatements
     -- filters down from.
     --
-    -- first_adsh resolves ties the way int_restatements does — the highest
+    -- first_adsh resolves ties the way int_restatements does, the highest
     -- accession issued on the earliest filing date. Numerator and denominator
     -- have to pick the same filing or a company that changed filer status
     -- mid-range would have its facts counted under one band and its
@@ -179,7 +179,7 @@ restated_attributed as (
 revisable_banded as (
 
     -- The two size measures are stacked rather than joined side by side. They
-    -- band different things — a filing's filer status, a company's assets — and
+    -- band different things, a filing's filer status, a company's assets, and
     -- have different populations, so they cannot share a row.
     select
         'filer_status'                                              as size_basis,

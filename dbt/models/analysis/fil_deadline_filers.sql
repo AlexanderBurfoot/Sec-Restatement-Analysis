@@ -32,7 +32,7 @@
 -- -3..+14 day window and on the following day at 10.8%, against a flat plateau
 -- of roughly 7% per day from day 2 through day 7. The spike is the signature of
 -- deadline-driven filing; the plateau is background. A wider bound was tried
--- first and rejected — at five days the flag captured 60% of all filings and
+-- first and rejected, at five days the flag captured 60% of all filings and
 -- 65% of companies read as habitual, because the bound sat above the median
 -- margin of four days and admitted the whole plateau.
 {% set deadline_margin_days = 1 %}
@@ -125,8 +125,8 @@ margins as (
 classified as (
 
     -- margin_days is days to spare: positive is early, zero is on the day,
-    -- negative is late. A late filing is also a deadline filing — the company
-    -- was working to the deadline and missed it — so the flag is an upper
+    -- negative is late. A late filing is also a deadline filing, the company
+    -- was working to the deadline and missed it, so the flag is an upper
     -- bound on the margin, not a band around zero.
     select
         margins.*,

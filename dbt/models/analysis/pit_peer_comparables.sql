@@ -102,7 +102,7 @@ best_known_value as (
 
     -- The value a reader would have had on the as-of date: the one from the
     -- latest filing visible then. value is the second tiebreaker for the same
-    -- reason int_restatements needs it — the duplicate-composite-key defect
+    -- reason int_restatements needs it, the duplicate-composite-key defect
     -- puts two values on one accession, and without it the pick is whatever
     -- order the scan returned and the model is not idempotent.
     select distinct on (as_of_dates.as_of_label, annual_facts.cik, annual_facts.tag, annual_facts.period_end_date)
