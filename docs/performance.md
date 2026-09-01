@@ -277,7 +277,7 @@ There is a real cost on the other side of the ledger, visible in the same plan.
 255,605 separate index descents. The trade is 5.8M extra cached buffer touches
 in exchange for 3.3M fewer disk reads and 5 GB of eliminated temp I/O. On this
 hardware that trade is worth about 25×; on a machine where the whole table
-cached, it would be worth much less.
+cached. It would be worth much less.
 
 ### Timings
 
@@ -406,7 +406,7 @@ node structure returns no differences. The planner declines to use the BRIN, and
 it is right to.
 
 This is the cleanest possible statement of the result: **the BRIN's effect on
-this query is not small, it is zero, and that is provable from the plan rather
+this query is not small. It is zero, and that is provable from the plan rather
 than inferred from a stopwatch.** The wall clocks (6.36 s with the BRIN against a
 baseline band of 6.56–10.15 s) would on their own suggest the BRIN made things
 slightly *faster*, which it plainly cannot have done. That wobble is page-cache
@@ -429,7 +429,7 @@ GroupAggregate  (cost=2038916.19..2264427.36 rows=746 width=28) (actual time=101
 Execution Time: 10469.443 ms
 ```
 
-The BRIN scan itself costs 65 buffers and 37 ms, the index is doing its own job
+The BRIN scan itself costs 65 buffers and 37 ms. The index is doing its own job
 efficiently. It then hands back **17,212,160 candidate rows to find 1,840,725
 real ones**, a 9.4× over-fetch, and the heap scan reads **1,721,216 blocks: 94%
 of the table**. `Rows Removed by Index Recheck: 7,826,817` per participant is
@@ -503,7 +503,7 @@ order.
 That 340,457 figure was identical in every environment regime measured, which is
 why it, and not the seconds, is the transferable result.
 
-### Index sizes, the ratio
+### Index sizes and the ratio
 
 | Index | Size | Blocks read by the test query | Median wall clock |
 |---|---|---|---|
@@ -566,7 +566,7 @@ This is the central computation of `int_restatements`: for each report of a
 described fact, what was that fact *first* reported at, and what is it reported
 at *now*. The model's own header comment records that an earlier formulation
 "did not finish in fifty minutes", so the pathological form is not hypothetical
-here, it is a shape this repository already had to abandon once.
+here. It is a shape this repository already had to abandon once.
 
 Both forms build the same `reports` CTE, which collapses to one row per
 described fact per publication date using the model's real tiebreak (highest
@@ -624,7 +624,7 @@ which would make `last_value` return the row it is called on.
 
 ### Scoping, stated plainly
 
-The correlated form is quadratic and cannot be run at full scale, that is the
+The correlated form is quadratic and cannot be run at full scale. That is the
 finding, not an obstacle to it. It is measured at two scopes so the scaling is
 observed rather than asserted:
 
@@ -698,8 +698,8 @@ WindowAgg  (cost=1971724.34..1971904.64 rows=4808 width=197) (actual time=10088.
 Execution Time: 10101.799 ms
 ```
 
-One sort into partition order, one pass. `Sort Method: quicksort Memory: 2660kB`
-,  it fits in `work_mem` and never touches disk. Sort plus `WindowAgg` together
+One sort into partition order, one pass. `Sort Method: quicksort Memory: 2660kB`, so it fits in `work_mem` and never
+touches disk. Sort plus `WindowAgg` together
 span **10.1 ms**, against the correlated form's 19.62 s for the same answer.
 
 ### Why it changed
