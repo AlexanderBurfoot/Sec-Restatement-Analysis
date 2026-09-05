@@ -1,5 +1,7 @@
 # SEC Restatement Analysis
 
+![build](https://github.com/AlexanderBurfoot/Sec-Restatement-Analysis/actions/workflows/dbt.yml/badge.svg)
+
 Companies revise the numbers they publish. A figure reported in one filing can
 appear at a different value in a later one, for the same period and the same
 unit, months afterwards.
