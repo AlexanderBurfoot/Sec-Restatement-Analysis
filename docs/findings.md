@@ -12,6 +12,44 @@ Every figure in this document is reproducible from the repository at the tag
 above by running `make up && make fetch && make load && dbt build`, then querying
 the models under the `analysis` and `marts` schemas.
 
+## Contents
+
+- [Executive summary](#executive-summary)
+- [§1 Data quality of SEC XBRL filings](#1-data-quality-of-sec-xbrl-filings)
+  - [1.1 Scorecard](#11-scorecard)
+  - [1.2 How long until a reported number is public?](#12-how-long-until-a-reported-number-is-public)
+  - [1.3 Custom tag usage by company size](#13-custom-tag-usage-by-company-size)
+  - [1.4 Units of measure](#14-units-of-measure)
+  - [1.5 Missing values](#15-missing-values)
+  - [1.6 Conflicting duplicate values](#16-conflicting-duplicate-values)
+  - [1.7 Rows rejected at ingestion](#17-rows-rejected-at-ingestion)
+  - [1.8 Issue register](#18-issue-register)
+  - [1.9 Verification](#19-verification)
+  - [1.10 Balance sheet reconciliation](#110-balance-sheet-reconciliation)
+  - [1.11 Concentration](#111-concentration)
+- [§2 Restatements (Stage 2)](#2-restatements-stage-2)
+  - [2.1 Which sectors restate most](#21-which-sectors-restate-most)
+  - [2.2 How large are revisions](#22-how-large-are-revisions)
+  - [2.3 Which line items get revised](#23-which-line-items-get-revised)
+  - [2.4 Do restatements cluster in time](#24-do-restatements-cluster-in-time)
+  - [2.5 Does one restatement predict another](#25-does-one-restatement-predict-another)
+  - [2.6 Serial restaters](#26-serial-restaters)
+  - [2.7 Verification](#27-verification)
+  - [2.8 Limitations](#28-limitations)
+- [§3 Filing behaviour and comparables (Stage 3)](#3-filing-behaviour-and-comparables-stage-3)
+  - [3.1 Filing lag by form and filer status](#31-filing-lag-by-form-and-filer-status)
+  - [3.2 Has the wait moved across the twelve quarters?](#32-has-the-wait-moved-across-the-twelve-quarters)
+  - [3.3 Filers who work to the deadline](#33-filers-who-work-to-the-deadline)
+  - [3.4 Point-in-time peer comparables](#34-point-in-time-peer-comparables)
+  - [3.5 Verification](#35-verification)
+  - [3.6 Limitations](#36-limitations)
+- [§4 What point-in-time discipline is worth (Stage 4)](#4-what-point-in-time-discipline-is-worth-stage-4)
+  - [4.1 The result](#41-the-result)
+  - [4.2 Where the gap comes from](#42-where-the-gap-comes-from)
+  - [4.3 Does the gap depend on the horizon?](#43-does-the-gap-depend-on-the-horizon)
+  - [4.4 Verification](#44-verification)
+  - [4.5 Limitations](#45-limitations)
+
 ---
 
 ## Executive summary

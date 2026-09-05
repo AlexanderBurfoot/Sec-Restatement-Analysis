@@ -15,3 +15,5 @@ prepush.sh
 verify_setup.sh
 verify_setup.sh
 fix_placeholders.sh
+FINISH.md
+check_blockb.sh

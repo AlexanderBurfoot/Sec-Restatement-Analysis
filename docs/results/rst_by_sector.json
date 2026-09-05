@@ -234,7 +234,7 @@
     "companies": 434,
     "restating_companies": 387,
     "pct_of_revisable_restated": 5.985,
-    "restatements_per_filing": 5.0,
+    "restatements_per_filing": 5,
     "pct_companies_restating": 89.17,
     "pct_restatements_downward": 62.41,
     "median_abs_pct_revision": 0.5311
@@ -715,7 +715,7 @@
     "restating_companies": 34,
     "pct_of_revisable_restated": 4.525,
     "restatements_per_filing": 5.43,
-    "pct_companies_restating": 85.0,
+    "pct_companies_restating": 85,
     "pct_restatements_downward": 55.13,
     "median_abs_pct_revision": 0.1132
   },
@@ -730,7 +730,7 @@
     "restating_companies": 19,
     "pct_of_revisable_restated": 8.561,
     "restatements_per_filing": 9.4,
-    "pct_companies_restating": 95.0,
+    "pct_companies_restating": 95,
     "pct_restatements_downward": 68.68,
     "median_abs_pct_revision": 0.297
   },
@@ -835,7 +835,7 @@
     "restating_companies": 27,
     "pct_of_revisable_restated": 4.36,
     "restatements_per_filing": 4.28,
-    "pct_companies_restating": 90.0,
+    "pct_companies_restating": 90,
     "pct_restatements_downward": 61.87,
     "median_abs_pct_revision": 0.4911
   },
@@ -910,7 +910,7 @@
     "restating_companies": 23,
     "pct_of_revisable_restated": 3.511,
     "restatements_per_filing": 4.66,
-    "pct_companies_restating": 92.0,
+    "pct_companies_restating": 92,
     "pct_restatements_downward": 57.17,
     "median_abs_pct_revision": 0.1901
   },
@@ -940,7 +940,7 @@
     "restating_companies": 12,
     "pct_of_revisable_restated": 7.546,
     "restatements_per_filing": 8.94,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 60.34,
     "median_abs_pct_revision": 0.6384
   },
@@ -985,7 +985,7 @@
     "restating_companies": 12,
     "pct_of_revisable_restated": 5.926,
     "restatements_per_filing": 6.83,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 43.1,
     "median_abs_pct_revision": 0.3473
   },
@@ -1061,7 +1061,7 @@
     "pct_of_revisable_restated": 4.106,
     "restatements_per_filing": 3.14,
     "pct_companies_restating": 92.86,
-    "pct_restatements_downward": 50.0,
+    "pct_restatements_downward": 50,
     "median_abs_pct_revision": 0.068
   },
   {
@@ -1105,7 +1105,7 @@
     "restating_companies": 5,
     "pct_of_revisable_restated": 7.423,
     "restatements_per_filing": 5.74,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 50.13,
     "median_abs_pct_revision": 0.4138
   },
@@ -1120,7 +1120,7 @@
     "restating_companies": 8,
     "pct_of_revisable_restated": 4.057,
     "restatements_per_filing": 4.26,
-    "pct_companies_restating": 80.0,
+    "pct_companies_restating": 80,
     "pct_restatements_downward": 61.88,
     "median_abs_pct_revision": 0.0177
   },
@@ -1135,7 +1135,7 @@
     "restating_companies": 2,
     "pct_of_revisable_restated": 7.702,
     "restatements_per_filing": 12.38,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 36.36,
     "median_abs_pct_revision": 0.2451
   },
@@ -1165,7 +1165,7 @@
     "restating_companies": 2,
     "pct_of_revisable_restated": 7.547,
     "restatements_per_filing": 8.2,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 75.61,
     "median_abs_pct_revision": 0.9792
   },
@@ -1180,7 +1180,7 @@
     "restating_companies": 2,
     "pct_of_revisable_restated": 7.377,
     "restatements_per_filing": 5.54,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 68.06,
     "median_abs_pct_revision": 0.4898
   },
@@ -1194,8 +1194,8 @@
     "companies": 2,
     "restating_companies": 2,
     "pct_of_revisable_restated": 2.216,
-    "restatements_per_filing": 2.0,
-    "pct_companies_restating": 100.0,
+    "restatements_per_filing": 2,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 26.47,
     "median_abs_pct_revision": 0.0291
   },
@@ -1210,7 +1210,7 @@
     "restating_companies": 1,
     "pct_of_revisable_restated": 0.669,
     "restatements_per_filing": 0.58,
-    "pct_companies_restating": 100.0,
+    "pct_companies_restating": 100,
     "pct_restatements_downward": 28.57,
     "median_abs_pct_revision": 0.0027
   },
@@ -1224,9 +1224,9 @@
     "companies": 1,
     "restating_companies": 1,
     "pct_of_revisable_restated": 0.344,
-    "restatements_per_filing": 1.0,
-    "pct_companies_restating": 100.0,
-    "pct_restatements_downward": 100.0,
+    "restatements_per_filing": 1,
+    "pct_companies_restating": 100,
+    "pct_restatements_downward": 100,
     "median_abs_pct_revision": 0.951
   }
 ]

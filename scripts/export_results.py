@@ -43,7 +43,7 @@ def conn_string() -> str:
 
 def encode(v):
     if isinstance(v, Decimal):
-        return float(v)
+        return int(v) if v == v.to_integral_value() else float(v)
     if hasattr(v, "isoformat"):
         return v.isoformat()
     return v

@@ -1,4 +1,4 @@
-.PHONY: up down fetch load build test docs profile clean results metrics metrics-check
+.PHONY: up down fetch load build test docs profile clean results metrics metrics-check charts
 
 up:
 	@docker info >/dev/null 2>&1 || (echo "Docker daemon not running - start Docker Desktop or run: colima start" && exit 1)
@@ -40,3 +40,6 @@ metrics:
 
 metrics-check:
 	python scripts/export_metrics.py --check
+
+charts:
+	python scripts/make_charts.py

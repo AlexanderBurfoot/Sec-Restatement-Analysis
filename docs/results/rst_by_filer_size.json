@@ -4,7 +4,7 @@
     "size_band": "01",
     "size_band_label": "decile 1 (smallest)",
     "band_sort": 1,
-    "min_total_assets": 1.0,
+    "min_total_assets": 1,
     "median_total_assets": 189571.0,
     "companies": 731,
     "restating_companies": 642,
@@ -33,7 +33,7 @@
     "size_band": "02",
     "size_band_label": "decile 2",
     "band_sort": 2,
-    "min_total_assets": 2105023.0,
+    "min_total_assets": 2105023,
     "median_total_assets": 6973000.0,
     "companies": 755,
     "restating_companies": 684,
@@ -48,7 +48,7 @@
     "revisable_groups_segment": 206105,
     "restatements_segment": 15596,
     "pct_restated_segment": 7.567,
-    "pct_segment_level": 40.0,
+    "pct_segment_level": 40,
     "revisable_groups_financial": 51185,
     "restatements_financial": 3148,
     "pct_restated_financial": 6.15,
@@ -62,7 +62,7 @@
     "size_band": "03",
     "size_band_label": "decile 3",
     "band_sort": 3,
-    "min_total_assets": 14092115.0,
+    "min_total_assets": 14092115,
     "median_total_assets": 25467950.0,
     "companies": 780,
     "restating_companies": 704,
@@ -91,7 +91,7 @@
     "size_band": "04",
     "size_band_label": "decile 4",
     "band_sort": 4,
-    "min_total_assets": 44792000.0,
+    "min_total_assets": 44792000,
     "median_total_assets": 75441105.5,
     "companies": 786,
     "restating_companies": 698,
@@ -120,7 +120,7 @@
     "size_band": "05",
     "size_band_label": "decile 5",
     "band_sort": 5,
-    "min_total_assets": 134673000.0,
+    "min_total_assets": 134673000,
     "median_total_assets": 216234500.0,
     "companies": 775,
     "restating_companies": 646,
@@ -149,7 +149,7 @@
     "size_band": "06",
     "size_band_label": "decile 6",
     "band_sort": 6,
-    "min_total_assets": 326555000.0,
+    "min_total_assets": 326555000,
     "median_total_assets": 502065000.0,
     "companies": 786,
     "restating_companies": 716,
@@ -178,7 +178,7 @@
     "size_band": "07",
     "size_band_label": "decile 7",
     "band_sort": 7,
-    "min_total_assets": 787248000.0,
+    "min_total_assets": 787248000,
     "median_total_assets": 1236939500.0,
     "companies": 806,
     "restating_companies": 759,
@@ -207,7 +207,7 @@
     "size_band": "08",
     "size_band_label": "decile 8",
     "band_sort": 8,
-    "min_total_assets": 1868133000.0,
+    "min_total_assets": 1868133000,
     "median_total_assets": 2759072500.0,
     "companies": 803,
     "restating_companies": 757,
@@ -229,14 +229,14 @@
     "revisable_groups_non_financial": 915595,
     "restatements_non_financial": 32459,
     "pct_restated_non_financial": 3.545,
-    "pct_financial": 27.0
+    "pct_financial": 27
   },
   {
     "size_basis": "assets_decile",
     "size_band": "09",
     "size_band_label": "decile 9",
     "band_sort": 9,
-    "min_total_assets": 4426055000.0,
+    "min_total_assets": 4426055000,
     "median_total_assets": 7146945000.0,
     "companies": 805,
     "restating_companies": 775,
@@ -258,14 +258,14 @@
     "revisable_groups_non_financial": 833090,
     "restatements_non_financial": 31006,
     "pct_restated_non_financial": 3.722,
-    "pct_financial": 36.0
+    "pct_financial": 36
   },
   {
     "size_basis": "assets_decile",
     "size_band": "10",
     "size_band_label": "decile 10 (largest)",
     "band_sort": 10,
-    "min_total_assets": 13305800000.0,
+    "min_total_assets": 13305800000,
     "median_total_assets": 33382990500.0,
     "companies": 811,
     "restating_companies": 796,
@@ -345,7 +345,7 @@
     "revisable_groups_non_financial": 2738066,
     "restatements_non_financial": 108252,
     "pct_restated_non_financial": 3.954,
-    "pct_financial": 28.0
+    "pct_financial": 28
   },
   {
     "size_basis": "filer_status",
@@ -432,6 +432,6 @@
     "revisable_groups_non_financial": 80045,
     "restatements_non_financial": 3352,
     "pct_restated_non_financial": 4.188,
-    "pct_financial": 30.0
+    "pct_financial": 30
   }
 ]

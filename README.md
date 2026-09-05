@@ -11,6 +11,14 @@ became public. Almost everything here follows from not collapsing them.
 Postgres and dbt over **42,797,341 numeric facts from 81,720 filings**, 2023 Q1
 to 2025 Q4. **426,706 restatements detected.**
 
+![dbt DAG](docs/img/dag.png)
+*30 models across four layers. The singular tests appear as nodes:
+`assert_no_overlapping_company_versions` checks the SCD2 dimension has no
+overlapping validity ranges, `assert_fact_grain_matches_staging` catches a fan out in the range join, and `assert_pit_features_exclude_future` rebuilds the point-in-time features a slower way and compares row by row.*
+
+Four raw source tables through typed staging views into the dimensional models,
+then the analysis models and singular tests behind each finding below.
+
 ## Headline findings
 
 **Comparing companies on restated figures moves one in thirty-three into a
@@ -49,6 +57,12 @@ non-accelerated, and large filers restate 40% more facts each. Data quality runs
 the other way: the smallest filers fail 0.54 rules on average against 0.07 for
 the largest. A screen built on filer size catches one problem and misses the
 other.
+
+![Restatement rate by total-assets decile](docs/img/restatement_rate_by_size.png)
+
+The rate peaks at 8.07% in the second assets decile, falls to 3.39% at the
+ninth, then turns back up to 4.19% at the largest — a reversal the regulatory
+filer bands average away.
 
 ## How detection works
 
@@ -191,6 +205,11 @@ cause where one is established, and a recommended action.
 | Balance sheet identity violation | accuracy | High | 12 | 0.0077 |
 | Filed before the period it reports | validity | High | 4 | 0.0049 |
 
+Six of the eight are computed in `dq_scorecard`; DQ-07 (balance sheet identity)
+and DQ-08 (mixed unit types on one tag) have their own models, since neither
+reduces to a row count against a single staging table. DQ-08 is counted per tag,
+which is why it has no row above.
+
 Two results from that stage are worth pulling out.
 
 **The SEC's documented natural key is incomplete.** It publishes the primary key
@@ -238,7 +257,7 @@ percentage points, which is the question worth asking after loading a quarter.
 
 ```
 scripts/     fetch, load, build fingerprint, result exports,
-             Stage 4 model comparison
+             README charts, Stage 4 model comparison
 dbt/
   models/
     staging/   typed, tested views over the raw text
@@ -252,6 +271,7 @@ docs/
   performance.md  three query optimisations, measured
   results/        six analysis tables as CSV and JSON, plus the
                   quality metrics baseline
+  img/            dbt DAG, and the chart above
 ```
 
 ```mermaid

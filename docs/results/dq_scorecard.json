@@ -3,48 +3,48 @@
     "rule_name": "Reporting duration exceeds ten years",
     "dimension": "validity",
     "severity": "high",
-    "rows_affected": 951.0,
-    "rows_checked": 42797341.0,
+    "rows_affected": 951,
+    "rows_checked": 42797341,
     "pct_affected": 0.00222
   },
   {
     "rule_name": "Duplicate key with conflicting values",
     "dimension": "consistency",
     "severity": "high",
-    "rows_affected": 300.0,
-    "rows_checked": 42797341.0,
+    "rows_affected": 300,
+    "rows_checked": 42797341,
     "pct_affected": 0.0007
   },
   {
     "rule_name": "Filed before the period it reports",
     "dimension": "validity",
     "severity": "high",
-    "rows_affected": 4.0,
-    "rows_checked": 81720.0,
+    "rows_affected": 4,
+    "rows_checked": 81720,
     "pct_affected": 0.00489
   },
   {
     "rule_name": "Null numeric value",
     "dimension": "completeness",
     "severity": "medium",
-    "rows_affected": 1898905.0,
-    "rows_checked": 42797341.0,
+    "rows_affected": 1898905,
+    "rows_checked": 42797341,
     "pct_affected": 4.43697
   },
   {
     "rule_name": "Rejected at load: embedded delimiter",
     "dimension": "validity",
     "severity": "medium",
-    "rows_affected": 236.0,
-    "rows_checked": 42797577.0,
+    "rows_affected": 236,
+    "rows_checked": 42797577,
     "pct_affected": 0.00055
   },
   {
     "rule_name": "Filing lag exceeds three years",
     "dimension": "timeliness",
     "severity": "medium",
-    "rows_affected": 59.0,
-    "rows_checked": 81720.0,
+    "rows_affected": 59,
+    "rows_checked": 81720,
     "pct_affected": 0.0722
   }
 ]
