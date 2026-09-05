@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-09-05T00:07:03+00:00",
+  "data_vintage": {
+    "first_quarter": "2023q1",
+    "last_quarter": "2025q4",
+    "quarters_loaded": 12
+  },
+  "environment": {
+    "postgres": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on aarch64-unknown-linux-gnu"
+  },
+  "dataset": {
+    "filings": 81720,
+    "numeric_facts": 42797341,
+    "restatements_detected": 426706
+  },
+  "quality_rules": [
+    {
+      "rule": "Duplicate key with conflicting values",
+      "dimension": "consistency",
+      "severity": "high",
+      "rows_affected": 300,
+      "rows_checked": 42797341,
+      "pct_affected": 0.0007
+    },
+    {
+      "rule": "Filed before the period it reports",
+      "dimension": "validity",
+      "severity": "high",
+      "rows_affected": 4,
+      "rows_checked": 81720,
+      "pct_affected": 0.00489
+    },
+    {
+      "rule": "Filing lag exceeds three years",
+      "dimension": "timeliness",
+      "severity": "medium",
+      "rows_affected": 59,
+      "rows_checked": 81720,
+      "pct_affected": 0.0722
+    },
+    {
+      "rule": "Null numeric value",
+      "dimension": "completeness",
+      "severity": "medium",
+      "rows_affected": 1898905,
+      "rows_checked": 42797341,
+      "pct_affected": 4.43697
+    },
+    {
+      "rule": "Rejected at load: embedded delimiter",
+      "dimension": "validity",
+      "severity": "medium",
+      "rows_affected": 236,
+      "rows_checked": 42797577,
+      "pct_affected": 0.00055
+    },
+    {
+      "rule": "Reporting duration exceeds ten years",
+      "dimension": "validity",
+      "severity": "high",
+      "rows_affected": 951,
+      "rows_checked": 42797341,
+      "pct_affected": 0.00222
+    }
+  ],
+  "restatement_classes": {
+    "zero_origin": 6950,
+    "extreme_magnitude": 10061,
+    "sign_flip": 29118,
+    "downward_pct": 57.76
+  },
+  "tolerance_pct_points": 0.05
+}

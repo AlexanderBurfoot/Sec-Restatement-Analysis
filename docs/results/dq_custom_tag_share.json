@@ -1,0 +1,23 @@
+[
+  {
+    "filer_status": "4-NON",
+    "companies": 5292,
+    "total_facts": 20847180,
+    "custom_facts": 2123451,
+    "pct_custom": 10.19
+  },
+  {
+    "filer_status": "2-ACC",
+    "companies": 1370,
+    "total_facts": 5112296,
+    "custom_facts": 372610,
+    "pct_custom": 7.29
+  },
+  {
+    "filer_status": "1-LAF",
+    "companies": 2778,
+    "total_facts": 16371923,
+    "custom_facts": 1145149,
+    "pct_custom": 6.99
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "form_type": "10-K",
+    "filer_status": "1-LAF",
+    "filings": 6302,
+    "mean_lag_days": 53.0,
+    "median_lag_days": 54.0,
+    "p90_lag_days": 60.0,
+    "min_lag_days": 18,
+    "max_lag_days": 808
+  },
+  {
+    "form_type": "10-K",
+    "filer_status": "2-ACC",
+    "filings": 2275,
+    "mean_lag_days": 68.0,
+    "median_lag_days": 67.0,
+    "p90_lag_days": 76.0,
+    "min_lag_days": 23,
+    "max_lag_days": 396
+  },
+  {
+    "form_type": "10-K",
+    "filer_status": "4-NON",
+    "filings": 8927,
+    "mean_lag_days": 94.0,
+    "median_lag_days": 87.0,
+    "p90_lag_days": 107.0,
+    "min_lag_days": 15,
+    "max_lag_days": 1095
+  },
+  {
+    "form_type": "10-K",
+    "filer_status": null,
+    "filings": 1,
+    "mean_lag_days": 88.0,
+    "median_lag_days": 88.0,
+    "p90_lag_days": 88.0,
+    "min_lag_days": 88,
+    "max_lag_days": 88
+  },
+  {
+    "form_type": "10-K",
+    "filer_status": null,
+    "filings": 17505,
+    "mean_lag_days": 76.0,
+    "median_lag_days": 67.0,
+    "p90_lag_days": 103.0,
+    "min_lag_days": 15,
+    "max_lag_days": 1095
+  },
+  {
+    "form_type": "10-K/A",
+    "filer_status": "1-LAF",
+    "filings": 98,
+    "mean_lag_days": 217.0,
+    "median_lag_days": 222.0,
+    "p90_lag_days": 360.3,
+    "min_lag_days": 47,
+    "max_lag_days": 439
+  },
+  {
+    "form_type": "10-K/A",
+    "filer_status": "2-ACC",
+    "filings": 52,
+    "mean_lag_days": 240.0,
+    "median_lag_days": 214.5,
+    "p90_lag_days": 450.5,
+    "min_lag_days": 52,
+    "max_lag_days": 643
+  },
+  {
+    "form_type": "10-K/A",
+    "filer_status": "4-NON",
+    "filings": 722,
+    "mean_lag_days": 241.0,
+    "median_lag_days": 205.0,
+    "p90_lag_days": 440.90000000000003,
+    "min_lag_days": 41,
+    "max_lag_days": 1083
+  },
+  {
+    "form_type": "10-K/A",
+    "filer_status": null,
+    "filings": 872,
+    "mean_lag_days": 238.0,
+    "median_lag_days": 206.5,
+    "p90_lag_days": 431.8,
+    "min_lag_days": 41,
+    "max_lag_days": 1083
+  },
+  {
+    "form_type": "10-Q",
+    "filer_status": "1-LAF",
+    "filings": 18680,
+    "mean_lag_days": 34.0,
+    "median_lag_days": 34.0,
+    "p90_lag_days": 39.0,
+    "min_lag_days": 9,
+    "max_lag_days": 517
+  },
+  {
+    "form_type": "10-Q",
+    "filer_status": "2-ACC",
+    "filings": 6675,
+    "mean_lag_days": 38.0,
+    "median_lag_days": 38.0,
+    "p90_lag_days": 41.0,
+    "min_lag_days": 16,
+    "max_lag_days": 410
+  },
+  {
+    "form_type": "10-Q",
+    "filer_status": "4-NON",
+    "filings": 27048,
+    "mean_lag_days": 50.0,
+    "median_lag_days": 44.0,
+    "p90_lag_days": 52.0,
+    "min_lag_days": 8,
+    "max_lag_days": 1080
+  },
+  {
+    "form_type": "10-Q",
+    "filer_status": null,
+    "filings": 52403,
+    "mean_lag_days": 43.0,
+    "median_lag_days": 39.0,
+    "p90_lag_days": 46.0,
+    "min_lag_days": 8,
+    "max_lag_days": 1080
+  },
+  {
+    "form_type": "10-Q/A",
+    "filer_status": "1-LAF",
+    "filings": 97,
+    "mean_lag_days": 180.0,
+    "median_lag_days": 166.0,
+    "p90_lag_days": 322.8,
+    "min_lag_days": 26,
+    "max_lag_days": 598
+  },
+  {
+    "form_type": "10-Q/A",
+    "filer_status": "2-ACC",
+    "filings": 76,
+    "mean_lag_days": 246.0,
+    "median_lag_days": 222.5,
+    "p90_lag_days": 451.0000000000001,
+    "min_lag_days": 32,
+    "max_lag_days": 866
+  },
+  {
+    "form_type": "10-Q/A",
+    "filer_status": "4-NON",
+    "filings": 804,
+    "mean_lag_days": 214.0,
+    "median_lag_days": 157.0,
+    "p90_lag_days": 453.70000000000005,
+    "min_lag_days": 17,
+    "max_lag_days": 993
+  },
+  {
+    "form_type": "10-Q/A",
+    "filer_status": null,
+    "filings": 977,
+    "mean_lag_days": 213.0,
+    "median_lag_days": 165.0,
+    "p90_lag_days": 432.40000000000003,
+    "min_lag_days": 17,
+    "max_lag_days": 993
+  },
+  {
+    "form_type": null,
+    "filer_status": null,
+    "filings": 71757,
+    "mean_lag_days": 56.0,
+    "median_lag_days": 43.0,
+    "p90_lag_days": 88.0,
+    "min_lag_days": 8,
+    "max_lag_days": 1095
+  }
+]

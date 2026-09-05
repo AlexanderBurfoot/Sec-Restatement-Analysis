@@ -1,0 +1,83 @@
+sic_division,sic_major_group,aggregation_level,restatements,revisable_groups,filings,companies,restating_companies,pct_of_revisable_restated,restatements_per_filing,pct_companies_restating,pct_restatements_downward,median_abs_pct_revision
+All sectors,,grand_total,426706,8918472,81720,8693,7544,4.785,5.22,86.78,57.76,0.4242
+Manufacturing,,division,153975,2663472,30728,3093,2761,5.781,5.01,89.27,62.49,0.5274
+"Finance, Insurance & Real Estate",,division,101291,2323787,18794,2247,1790,4.359,5.39,79.66,52.27,0.3014
+Services,,division,76916,1352516,15052,1699,1473,5.687,5.11,86.70,59.50,0.4272
+"Transport, Comms & Utilities",,division,33155,678871,5091,589,525,4.884,6.51,89.13,53.19,0.3811
+Retail Trade,,division,16697,326942,3382,347,317,5.107,4.94,91.35,56.67,0.3687
+Mining,,division,16665,353385,3841,460,400,4.716,4.34,86.96,53.41,0.3825
+Unclassified,,division,13564,941190,1875,213,187,1.441,7.23,87.79,52.51,0.7500
+Wholesale Trade,,division,7491,143499,1580,170,145,5.220,4.74,85.29,58.27,0.3068
+"Agriculture, Forestry & Fishing",,division,3510,51040,558,56,52,6.877,6.29,92.86,62.74,0.5852
+Construction,,division,3442,83770,819,98,81,4.109,4.20,82.65,53.25,0.3240
+Manufacturing,28,major_group,55391,952052,12754,1298,1136,5.818,4.34,87.52,64.71,0.8778
+Services,73,major_group,49400,868950,9747,1110,968,5.685,5.07,87.21,59.81,0.3846
+"Finance, Insurance & Real Estate",60,major_group,35835,853218,4775,459,432,4.200,7.50,94.12,46.77,0.1603
+"Finance, Insurance & Real Estate",67,major_group,23768,589522,6820,1006,705,4.032,3.49,70.08,56.97,0.6045
+Manufacturing,38,major_group,22833,381528,4564,434,387,5.985,5.00,89.17,62.41,0.5311
+Manufacturing,36,major_group,20505,358742,3867,387,353,5.716,5.30,91.21,61.52,0.3417
+"Finance, Insurance & Real Estate",63,major_group,16991,262126,1515,145,131,6.482,11.22,90.34,54.33,0.1822
+Manufacturing,35,major_group,14534,227146,2284,224,202,6.399,6.36,90.18,58.52,0.1818
+"Transport, Comms & Utilities",49,major_group,14432,349061,2103,216,202,4.135,6.86,93.52,48.73,0.3778
+Unclassified,,major_group,13564,941190,1875,213,187,1.441,7.23,87.79,52.51,0.7500
+"Transport, Comms & Utilities",48,major_group,11090,144447,1304,154,131,7.678,8.50,85.06,55.34,0.4438
+"Finance, Insurance & Real Estate",61,major_group,9987,210228,1909,232,191,4.751,5.23,82.33,58.16,0.5547
+Manufacturing,37,major_group,9771,188328,1918,208,186,5.188,5.09,89.42,63.01,0.5714
+Manufacturing,20,major_group,7270,133658,1412,149,129,5.439,5.15,86.58,61.05,0.3573
+Mining,13,major_group,7254,180048,1991,219,186,4.029,3.64,84.93,53.05,0.4481
+Retail Trade,59,major_group,6905,109478,1205,137,127,6.307,5.73,92.70,54.79,0.4438
+"Finance, Insurance & Real Estate",62,major_group,6707,237656,2139,239,185,2.822,3.14,77.41,53.44,0.4847
+Services,80,major_group,6585,133394,1433,151,132,4.937,4.60,87.42,62.37,0.5041
+Services,87,major_group,6139,102636,1279,140,117,5.981,4.80,83.57,62.36,0.5104
+Mining,10,major_group,5868,127154,1448,197,177,4.615,4.05,89.85,54.31,0.4409
+"Finance, Insurance & Real Estate",65,major_group,5156,128810,1279,141,117,4.003,4.03,82.98,47.25,0.5000
+Services,79,major_group,4593,70820,798,94,80,6.485,5.76,85.11,55.67,0.5028
+Manufacturing,34,major_group,4456,74475,734,75,70,5.983,6.07,93.33,62.97,0.1710
+Wholesale Trade,50,major_group,4098,77563,871,91,80,5.283,4.70,87.91,59.35,0.3208
+Wholesale Trade,51,major_group,3393,65936,709,81,66,5.146,4.79,81.48,56.97,0.2949
+Retail Trade,58,major_group,3206,73359,713,73,62,4.370,4.50,84.93,61.26,0.2194
+Manufacturing,33,major_group,3103,57748,482,54,49,5.373,6.44,90.74,56.33,0.3494
+Services,82,major_group,2857,44459,475,77,67,6.426,6.01,87.01,58.24,0.8499
+"Finance, Insurance & Real Estate",64,major_group,2847,42227,357,38,35,6.742,7.97,92.11,55.74,0.2292
+Mining,14,major_group,2594,30169,263,34,27,8.598,9.86,79.41,56.17,0.2102
+Manufacturing,30,major_group,2422,33907,306,30,28,7.143,7.92,93.33,63.42,0.2481
+Retail Trade,55,major_group,2391,42731,392,39,37,5.595,6.10,94.87,57.34,0.3389
+Manufacturing,39,major_group,2382,47825,525,57,51,4.981,4.54,89.47,64.44,0.7180
+"Agriculture, Forestry & Fishing",01,major_group,2369,33037,324,35,33,7.171,7.31,94.29,62.73,0.5213
+Services,78,major_group,2183,31983,335,38,31,6.826,6.52,81.58,55.75,0.5766
+"Transport, Comms & Utilities",44,major_group,2167,55199,466,75,71,3.926,4.65,94.67,57.87,0.1737
+Services,70,major_group,2086,46102,384,40,34,4.525,5.43,85.00,55.13,0.1132
+Manufacturing,25,major_group,2002,23386,213,20,19,8.561,9.40,95.00,68.68,0.2970
+Manufacturing,26,major_group,1955,29241,264,26,25,6.686,7.41,96.15,61.94,0.2925
+Manufacturing,23,major_group,1776,35694,344,37,33,4.976,5.16,89.19,64.30,0.2336
+"Transport, Comms & Utilities",45,major_group,1668,45147,395,40,37,3.695,4.22,92.50,61.21,0.8571
+"Transport, Comms & Utilities",47,major_group,1598,41365,420,54,46,3.863,3.80,85.19,61.26,0.3021
+Construction,15,major_group,1494,35090,369,41,37,4.258,4.05,90.24,51.61,0.1469
+Services,72,major_group,1463,23051,323,32,29,6.347,4.53,90.63,61.11,0.4818
+Retail Trade,56,major_group,1445,33145,338,30,27,4.360,4.28,90.00,61.87,0.4911
+"Transport, Comms & Utilities",46,major_group,1255,13987,110,12,10,8.973,11.41,83.33,55.06,0.0706
+Manufacturing,32,major_group,1197,13829,128,19,18,8.656,9.35,94.74,44.03,1.1776
+Retail Trade,57,major_group,1135,17759,205,21,20,6.391,5.54,95.24,54.89,0.2792
+Services,75,major_group,1108,22512,204,19,17,4.922,5.43,89.47,50.72,0.9990
+Manufacturing,29,major_group,1067,30389,229,25,23,3.511,4.66,92.00,57.17,0.1901
+Manufacturing,27,major_group,1002,25481,229,28,24,3.932,4.38,85.71,58.78,0.3345
+Manufacturing,21,major_group,1001,13265,112,12,12,7.546,8.94,100.00,60.34,0.6384
+Construction,16,major_group,998,24668,223,23,19,4.046,4.48,82.61,56.21,0.3676
+Construction,17,major_group,950,24012,227,34,25,3.956,4.19,73.53,52.74,0.4000
+Mining,12,major_group,949,16014,139,12,12,5.926,6.83,100.00,43.10,0.3473
+Retail Trade,53,major_group,674,18225,176,17,15,3.698,3.83,88.24,54.60,0.4560
+"Agriculture, Forestry & Fishing",07,major_group,623,10735,142,13,11,5.803,4.39,84.62,69.02,0.9231
+"Transport, Comms & Utilities",42,major_group,583,20742,207,27,20,2.811,2.82,74.07,51.11,0.5000
+Manufacturing,24,major_group,528,14254,149,16,14,3.704,3.54,87.50,52.84,0.1392
+Retail Trade,52,major_group,506,12322,161,14,13,4.106,3.14,92.86,50.00,0.0680
+Manufacturing,31,major_group,501,13777,128,13,11,3.636,3.91,84.62,60.68,0.2238
+Retail Trade,54,major_group,435,19923,192,18,17,2.183,2.27,94.44,47.36,0.3397
+"Agriculture, Forestry & Fishing",02,major_group,373,5025,65,5,5,7.423,5.74,100.00,50.13,0.4138
+"Transport, Comms & Utilities",40,major_group,362,8923,85,10,8,4.057,4.26,80.00,61.88,0.0177
+Services,89,major_group,297,3856,24,2,2,7.702,12.38,100.00,36.36,0.2451
+Manufacturing,22,major_group,279,8747,86,8,7,3.190,3.24,87.50,52.69,0.0385
+Services,76,major_group,164,2173,20,2,2,7.547,8.20,100.00,75.61,0.9792
+"Agriculture, Forestry & Fishing",09,major_group,144,1952,26,2,2,7.377,5.54,100.00,68.06,0.4898
+Services,83,major_group,34,1534,17,2,2,2.216,2.00,100.00,26.47,0.0291
+Services,81,major_group,7,1046,12,1,1,0.669,0.58,100.00,28.57,0.0027
+"Agriculture, Forestry & Fishing",08,major_group,1,291,1,1,1,0.344,1.00,100.00,100.00,0.9510

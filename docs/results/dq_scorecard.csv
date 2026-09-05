@@ -1,0 +1,7 @@
+rule_name,dimension,severity,rows_affected,rows_checked,pct_affected
+Reporting duration exceeds ten years,validity,high,951,42797341,0.00222
+Duplicate key with conflicting values,consistency,high,300,42797341,0.00070
+Filed before the period it reports,validity,high,4,81720,0.00489
+Null numeric value,completeness,medium,1898905,42797341,4.43697
+Rejected at load: embedded delimiter,validity,medium,236,42797577,0.00055
+Filing lag exceeds three years,timeliness,medium,59,81720,0.07220

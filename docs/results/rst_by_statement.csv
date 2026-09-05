@@ -1,0 +1,114 @@
+statement_code,statement_name,tag,aggregation_level,rank_within_statement,restatements,revisable_groups,restating_companies,distinct_tags,pct_of_revisable_restated,pct_restatements_downward,median_abs_pct_revision,includes_custom_tag,placement_is_ambiguous
+ALL,All statements,,grand_total,,426706,8918472,7544,115745,4.785,57.76,0.4242,t,t
+IS,income statement,,statement,,162517,2230383,5611,11771,7.287,60.80,0.2628,t,t
+CF,cash flow,,statement,,91851,2125699,5978,52252,4.321,53.09,0.3942,t,t
+BS,balance sheet,,statement,,78290,1834082,6138,17350,4.269,54.89,0.3136,t,t
+EQ,equity,,statement,,74623,1761520,4967,29922,4.236,61.22,0.9425,t,t
+CI,comprehensive income,,statement,,10787,297991,1486,2057,3.620,52.22,0.4438,t,t
+SI,supplementary information,,statement,,7604,634181,200,895,1.199,53.76,0.8431,t,t
+UN,unclassified,,statement,,1034,34616,150,1498,2.987,48.84,0.7500,t,t
+IS,income statement,RevenueFromContractWithCustomerExcludingAssessedTax,tag,1,19898,306478,1206,1,6.492,60.50,0.1223,f,f
+EQ,equity,StockholdersEquity,tag,1,15065,347704,2051,1,4.333,61.60,0.6429,t,f
+IS,income statement,Revenues,tag,2,9603,132359,801,1,7.255,58.79,0.1431,f,f
+IS,income statement,OperatingIncomeLoss,tag,3,9597,96998,1479,1,9.894,51.22,0.1762,t,f
+CF,cash flow,NetIncomeLoss,tag,1,8912,178968,1417,1,4.980,59.37,0.2294,t,t
+IS,income statement,EarningsPerShareBasic,tag,4,8086,77166,1700,1,10.479,75.45,3.0000,f,f
+IS,income statement,EarningsPerShareDiluted,tag,5,7741,73391,1718,1,10.548,74.37,2.0000,f,f
+IS,income statement,IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,tag,6,6539,71559,1091,1,9.138,52.19,0.1847,f,f
+EQ,equity,StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,tag,2,6324,211472,763,1,2.990,60.03,0.0968,f,f
+IS,income statement,WeightedAverageNumberOfSharesOutstandingBasic,tag,7,6317,67464,1340,1,9.364,74.70,0.9500,t,f
+IS,income statement,WeightedAverageNumberOfDilutedSharesOutstanding,tag,8,5947,63336,1383,1,9.390,72.79,0.9500,t,f
+EQ,equity,SharesOutstanding,tag,3,5844,60079,1048,1,9.727,79.48,0.9546,f,f
+CF,cash flow,ProfitLoss,tag,2,5252,99402,974,1,5.284,56.40,0.2066,f,t
+IS,income statement,IncomeTaxExpenseBenefit,tag,9,5022,74052,1017,1,6.782,57.25,0.4029,f,f
+BS,balance sheet,Assets,tag,1,4808,68281,1462,1,7.041,50.96,0.0694,f,f
+BS,balance sheet,CommonStockSharesOutstanding,tag,2,4387,63086,1679,1,6.954,73.54,0.9500,f,f
+IS,income statement,GeneralAndAdministrativeExpense,tag,10,4343,46838,1037,1,9.272,61.04,0.1468,f,f
+IS,income statement,OtherNonoperatingIncomeExpense,tag,11,3874,39636,912,1,9.774,55.29,0.7540,t,f
+IS,income statement,OperatingExpenses,tag,12,3739,41773,859,1,8.951,64.35,0.1493,f,f
+IS,income statement,GrossProfit,tag,13,3393,41438,693,1,8.188,67.58,0.1344,f,f
+EQ,equity,StockIssuedDuringPeriodSharesNewIssues,tag,4,3375,28842,774,1,11.702,86.87,0.9500,f,f
+BS,balance sheet,CommonStockSharesIssued,tag,3,3227,39039,1596,1,8.266,74.03,0.9444,f,f
+CF,cash flow,NetCashProvidedByUsedInOperatingActivities,tag,3,3178,56753,1141,1,5.600,52.01,0.1691,f,f
+IS,income statement,SellingGeneralAndAdministrativeExpense,tag,14,3017,29951,608,1,10.073,72.52,0.1089,f,f
+IS,income statement,CostOfGoodsAndServicesSold,tag,15,2835,41592,439,1,6.816,66.07,0.1195,f,f
+BS,balance sheet,Goodwill,tag,4,2728,35418,1147,1,7.702,54.66,0.0660,f,f
+SI,supplementary information,InvestmentOwnedAtFairValue,tag,1,2383,172703,143,1,1.380,50.44,0.5867,f,t
+BS,balance sheet,Liabilities,tag,5,2371,36003,1001,1,6.586,36.10,0.0857,f,f
+CI,comprehensive income,ComprehensiveIncomeNetOfTax,tag,1,2284,50534,582,1,4.520,55.82,0.0945,f,f
+BS,balance sheet,RetainedEarningsAccumulatedDeficit,tag,6,2237,27615,999,1,8.101,63.66,0.0778,f,f
+BS,balance sheet,InvestmentOwnedAtCost,tag,7,2122,145578,124,1,1.458,57.68,0.8906,f,t
+CF,cash flow,CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,tag,4,2113,56773,706,1,3.722,54.52,0.2660,t,t
+CF,cash flow,OtherNoncashIncomeExpense,tag,5,2101,10787,618,1,19.477,50.07,0.6250,t,f
+EQ,equity,StockIssuedDuringPeriodValueNewIssues,tag,5,1951,49071,583,1,3.976,56.79,0.8995,t,f
+CF,cash flow,NetCashProvidedByUsedInFinancingActivities,tag,6,1940,54557,819,1,3.556,44.74,0.2944,f,f
+CF,cash flow,NetCashProvidedByUsedInInvestingActivities,tag,7,1882,49515,712,1,3.801,53.77,0.2380,t,f
+CF,cash flow,IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets,tag,8,1771,21870,620,1,8.098,48.39,0.4972,f,f
+CF,cash flow,IncreaseDecreaseInAccountsReceivable,tag,9,1755,26092,646,1,6.726,50.14,0.5424,f,f
+EQ,equity,Equity,tag,6,1644,28991,181,1,5.671,42.88,0.3942,f,f
+CF,cash flow,DepreciationDepletionAndAmortization,tag,10,1632,35088,401,1,4.651,65.26,0.1287,t,f
+BS,balance sheet,LiabilitiesAndStockholdersEquity,tag,8,1631,28504,790,1,5.722,56.90,0.0400,f,f
+BS,balance sheet,LiabilitiesCurrent,tag,9,1570,23396,818,1,6.711,39.55,0.1063,f,f
+BS,balance sheet,CommonStockSharesAuthorized,tag,10,1565,30967,958,1,5.054,45.37,0.9843,f,f
+EQ,equity,OtherComprehensiveIncomeLossNetOfTax,tag,7,1518,57826,238,1,2.625,46.64,0.1667,f,t
+BS,balance sheet,CommonStockValue,tag,11,1513,28176,986,1,5.370,75.81,0.9496,f,f
+CF,cash flow,ShareBasedCompensation,tag,11,1509,49092,545,1,3.074,61.10,0.1655,f,t
+CF,cash flow,IncreaseDecreaseInInventories,tag,12,1421,20773,467,1,6.841,48.91,0.5307,f,f
+SI,supplementary information,InvestmentOwnedBalancePrincipalAmount,tag,2,1382,102828,87,1,1.344,31.19,0.9880,f,f
+CF,cash flow,DepreciationAndAmortization,tag,13,1375,23734,326,1,5.793,67.78,0.1656,f,f
+CF,cash flow,IncreaseDecreaseInAccountsPayableAndAccruedLiabilities,tag,14,1351,15878,496,1,8.509,51.44,0.2972,f,f
+BS,balance sheet,AssetsCurrent,tag,12,1341,23343,747,1,5.745,53.62,0.1268,f,f
+EQ,equity,StockIssuedDuringPeriodSharesStockOptionsExercised,tag,8,1278,16470,470,1,7.760,74.57,0.9600,t,f
+BS,balance sheet,PropertyPlantAndEquipmentNet,tag,13,1274,26255,680,1,4.852,68.92,0.1594,f,f
+BS,balance sheet,CashAndCashEquivalentsAtCarryingValue,tag,14,1239,33660,633,1,3.681,69.65,0.1674,f,f
+CF,cash flow,PaymentsForProceedsFromOtherInvestingActivities,tag,15,1239,9768,418,1,12.684,52.95,0.7412,f,f
+EQ,equity,AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue,tag,9,1228,86739,270,1,1.416,48.37,0.1463,f,f
+EQ,equity,StockIssuedDuringPeriodValueShareBasedCompensation,tag,10,1183,39134,255,1,3.023,45.65,0.9288,f,f
+BS,balance sheet,PropertyPlantAndEquipment,tag,15,1183,21770,118,1,5.434,36.69,1.1776,t,t
+EQ,equity,SharesIssued,tag,11,1140,14338,213,1,7.951,71.32,0.9920,t,f
+SI,supplementary information,InvestmentOwnedPercentOfNetAssets,tag,3,1043,87041,102,1,1.198,59.73,0.8462,f,f
+EQ,equity,StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities,tag,12,976,7092,342,1,13.762,81.45,0.9784,f,f
+EQ,equity,StockIssuedDuringPeriodSharesIssuedForServices,tag,13,923,5667,270,1,16.287,88.62,0.9600,f,f
+EQ,equity,StockIssuedDuringPeriodSharesShareBasedCompensation,tag,14,888,12527,316,1,7.089,64.19,0.9750,t,f
+CI,comprehensive income,ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest,tag,2,869,19961,212,1,4.353,58.92,0.0839,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax,tag,3,843,29604,224,1,2.848,42.23,0.1250,f,f
+EQ,equity,StockIssuedDuringPeriodValueConversionOfConvertibleSecurities,tag,15,743,12379,233,1,6.002,55.85,0.9502,f,f
+SI,supplementary information,InvestmentBasisSpreadVariableRate,tag,4,705,84244,54,1,0.837,83.69,0.9900,f,f
+SI,supplementary information,InvestmentInterestRate,tag,5,445,75152,64,1,0.592,66.52,0.4339,f,f
+CI,comprehensive income,ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest,tag,4,409,12076,126,1,3.387,53.06,0.8901,f,f
+SI,supplementary information,ConcentrationRiskPercentage1,tag,6,347,4111,24,1,8.441,49.86,0.1111,f,f
+SI,supplementary information,InvestmentOwnedBalanceShares,tag,7,300,16318,34,1,1.838,71.67,0.9990,f,f
+CI,comprehensive income,OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax,tag,5,271,11120,74,1,2.437,53.14,0.4444,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax,tag,6,243,8747,65,1,2.778,49.79,0.9139,f,f
+CI,comprehensive income,OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodTax,tag,7,230,3033,67,1,7.583,51.74,2.0000,f,f
+CI,comprehensive income,OtherComprehensiveIncomeForeignCurrencyTransactionAndTranslationAdjustmentNetOfTaxPortionAttributableToParent,tag,8,226,13078,67,1,1.728,57.08,0.3016,f,t
+CI,comprehensive income,ComprehensiveIncomeAttributableToOwnersOfParent,tag,9,209,1698,64,1,12.309,46.41,0.7355,f,t
+CI,comprehensive income,OtherComprehensiveIncomeForeignCurrencyTransactionAndTranslationGainLossArisingDuringPeriodNetOfTax,tag,10,207,6075,49,1,3.407,55.56,0.2500,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossTax,tag,11,195,3795,63,1,5.138,39.49,1.9058,f,f
+SI,supplementary information,InvestmentInterestRateFloor,tag,8,192,21631,19,1,0.888,90.63,0.9900,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax,tag,12,180,9486,52,1,1.898,55.00,0.1099,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentTax,tag,13,157,3048,46,1,5.151,50.96,2.0000,t,t
+CI,comprehensive income,OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax,tag,14,145,5238,36,1,2.768,60.69,2.0000,f,f
+CI,comprehensive income,OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax,tag,15,142,2149,54,1,6.608,52.11,2.0000,f,f
+SI,supplementary information,InvestmentInterestRatePaidInKind,tag,9,137,10252,35,1,1.336,66.42,0.9900,f,f
+UN,unclassified,StockIssuedDuringPeriodSharesPeriodIncreaseDecrease,tag,1,107,836,13,1,12.799,67.29,0.9850,f,t
+UN,unclassified,StockholdersEquityPeriodIncreaseDecrease,tag,2,96,3096,24,1,3.101,47.92,0.4586,f,t
+SI,supplementary information,InvestmentsInAndAdvancesToAffiliatesAtFairValueGrossAdditions,tag,10,64,1572,10,1,4.071,21.88,2.1338,f,f
+UN,unclassified,UnfundedCommitmentFairValue,tag,3,61,93,1,1,65.591,81.97,2.0000,t,f
+SI,supplementary information,InvestmentCompanyFinancialCommitmentToInvesteeFutureAmount,tag,11,56,10830,7,1,0.517,50.00,0.7427,f,t
+UN,unclassified,InvestmentCompanyDividendDistribution,tag,4,44,2279,14,1,1.931,40.91,0.3505,f,f
+SI,supplementary information,InvestmentInterestRatePaidInCash,tag,12,43,4595,5,1,0.936,86.05,0.9899,f,f
+UN,unclassified,NetInvestmentIncomeLossRatio,tag,5,39,121,2,1,32.231,2.56,0.1779,t,f
+UN,unclassified,TotalExpenseRatio,tag,6,39,121,2,1,32.231,94.87,0.1648,t,f
+SI,supplementary information,InvestmentsInAndAdvancesToAffiliatesAtFairValueGrossReductions,tag,13,38,1356,7,1,2.802,26.32,1.3992,f,f
+UN,unclassified,TotalExpensesAndProfitShareAllocation,tag,7,37,51,1,1,72.549,100.00,0.1588,t,f
+UN,unclassified,InvestmentIncomeOperatingAfterExpenseAndTax,tag,8,34,1709,12,1,1.989,17.65,0.0209,f,t
+UN,unclassified,AssetsNet,tag,9,33,1954,15,1,1.689,45.45,1.0000,f,f
+SI,supplementary information,DerivativeAssetFairValueGrossLiability,tag,14,26,275,3,1,9.455,7.69,2.0000,f,t
+UN,unclassified,NetInvestmentIncomeLossPerUnit,tag,10,25,81,1,1,30.864,0.00,0.1803,t,f
+UN,unclassified,TradingGainsLossesPerUnit,tag,11,25,29,1,1,86.207,100.00,0.0240,t,f
+UN,unclassified,RealizedGainLossInvestmentDerivativeAndForeignCurrencyTransactionPriceChangeOperatingBeforeTax,tag,12,24,609,2,1,3.941,16.67,0.0116,f,f
+SI,supplementary information,DerivativeNotionalAmount,tag,15,24,551,5,1,4.356,25.00,999.0000,f,f
+UN,unclassified,DeferredCreditsAndOtherLiabilities,tag,13,19,188,6,1,10.106,73.68,0.1274,f,t
+UN,unclassified,IncreaseDecreaseInNetAssetsValue,tag,14,19,40,1,1,47.500,5.26,2.0000,t,f
+UN,unclassified,InvestmentCompanyTaxReturnOfCapitalDistribution,tag,15,17,133,5,1,12.782,5.88,2.0000,f,f

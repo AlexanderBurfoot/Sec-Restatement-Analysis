@@ -1,4 +1,4 @@
-.PHONY: up down fetch load build test docs profile clean
+.PHONY: up down fetch load build test docs profile clean results metrics metrics-check
 
 up:
 	@docker info >/dev/null 2>&1 || (echo "Docker daemon not running - start Docker Desktop or run: colima start" && exit 1)
@@ -30,3 +30,13 @@ profile:
 
 clean:
 	docker compose down -v
+
+results:
+	python scripts/export_results.py
+	python scripts/export_metrics.py
+
+metrics:
+	python scripts/export_metrics.py
+
+metrics-check:
+	python scripts/export_metrics.py --check

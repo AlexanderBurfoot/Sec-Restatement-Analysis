@@ -221,10 +221,24 @@ with identical checksums. An earlier version tiebroke conflicting same-day value
 on accession number alone, which is not a total order when the conflict sits
 inside one filing, and consecutive builds disagreed.
 
+## Results
+
+`make results` writes six analysis tables to [`docs/results/`](docs/results/) as
+both CSV and JSON. CSV because GitHub renders it as a sortable table in the
+browser, so a reader can check a figure against the prose without cloning
+anything. JSON because comparison between runs is structural rather than
+row-wise, and a flat table cannot express a rule being added or removed.
+
+`quality_metrics.json` is the committed baseline: data vintage, dataset totals
+and the six scorecard rules. `make metrics-check` re-runs those queries against
+the live database and reports any rule whose rate has moved more than 0.05
+percentage points, which is the question worth asking after loading a quarter.
+
 ## Structure
 
 ```
-scripts/     fetch, load, build fingerprint, Stage 4 model comparison
+scripts/     fetch, load, build fingerprint, result exports,
+             Stage 4 model comparison
 dbt/
   models/
     staging/   typed, tested views over the raw text
@@ -236,6 +250,8 @@ docs/
   findings.md     §1 data quality, §2 restatements, §3 filing behaviour
                   and comparables, §4 point-in-time discipline
   performance.md  three query optimisations, measured
+  results/        six analysis tables as CSV and JSON, plus the
+                  quality metrics baseline
 ```
 
 All transformation is SQL. Python does file acquisition, ingestion and one
