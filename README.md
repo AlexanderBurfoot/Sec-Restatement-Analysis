@@ -254,6 +254,66 @@ docs/
                   quality metrics baseline
 ```
 
+```mermaid
+erDiagram
+    dim_company ||--o{ fct_financial_fact : "filed_date between valid_from and valid_to"
+    dim_filing  ||--o{ fct_financial_fact : "adsh"
+    dim_date    ||--o{ fct_financial_fact : "date_day = filed_date"
+    dim_tag     |o--o{ fct_financial_fact : "tag + taxonomy_version"
+
+    fct_financial_fact {
+        text financial_fact_sk PK
+        text company_sk FK "range join on filed_date"
+        text filing_sk FK
+        text tag_sk FK
+        int  filed_date_sk FK
+        bigint cik "degenerate: int_restatements partitions on it"
+        date period_end_date "the period the number describes"
+        date filed_date "the date it became public"
+        numeric value
+    }
+
+    dim_company {
+        text company_sk PK
+        bigint cik
+        date valid_from "SCD2 version start"
+        date valid_to "SCD2 version end, 9999-12-31 while open"
+        text company_name
+        text sic_code
+        bool is_current "never used to join facts"
+    }
+
+    dim_filing {
+        text filing_sk PK
+        text adsh
+        text form_type
+        text filer_status
+        bool is_amendment
+        bool was_later_amended
+    }
+
+    dim_tag {
+        text tag_sk PK
+        text tag
+        text taxonomy_version
+        text statement_code "BS / IS / CF / EQ / CI / SI / UN"
+        bool is_custom
+    }
+
+    dim_date {
+        int  date_sk PK
+        date date_day
+    }
+```
+
+The fact joins `dim_company` on a validity range using `filed_date`, not on
+`is_current`, so every number carries the name and SIC the filer had when it was
+published. `dim_tag` is a left join: a tag the current dictionary snapshot does
+not define is still a reported number. The full composite grain is carried on
+the fact table alongside the surrogate keys — `adsh`, `tag`,
+`taxonomy_version`, `coregistrant`, `segments`, `period_end_date`, `qtrs`,
+`unit_of_measure`.
+
 All transformation is SQL. Python does file acquisition, ingestion and one
 scikit-learn call. No aggregation happens outside the database.
 
