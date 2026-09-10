@@ -627,7 +627,7 @@ models:
       other two have a history and it is respected: prior_restatement_count
       admits a revision on the day that revision was published, and
       sector_restatement_rate is an expanding window over filings of the same SIC
-      major group, as recorded on the dim_company version current at filing , 
+      major group, as recorded on the dim_company version current at filing,
       whose own observation window had already closed. Dating the sector
       contribution at filed_date plus the horizon rather than at filed_date is
       what keeps filings still being watched out of the denominator as clean

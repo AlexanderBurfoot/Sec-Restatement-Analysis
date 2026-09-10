@@ -30,19 +30,17 @@ different quartile.** The same peer comparison was built twice over the identica
 period, same code. 103 companies land in a different performance quartile, 42 of
 them moving two or more. Nothing on the output marks which rows moved.
 
-The largest cause is not restatement. It is industry reclassification: 19
-companies changed SIC major group and 18 of them moved quartile materially, nine
-being software and electronics firms that became financial firms after the
-period.
+Industry reclassification, not restatement, is the largest cause: 19 companies
+changed SIC major group and 18 of them moved quartile materially, nine being
+software and electronics firms that became financial firms after the period.
 
-**Restatements do not arrive in amendments.** Only 8.26% of the 426,706 revisions
-came in a form ending in `/A`. The rest arrived inside an ordinary 10-Q or 10-K
-carrying a revised comparative, median 364 days later, unmarked. Watching for
-amendments catches one restatement in twelve.
+Only 8.26% of the 426,706 revisions came in a form ending in `/A`. The rest
+arrived inside an ordinary 10-Q or 10-K carrying a revised comparative, median
+364 days later, and unmarked as a revision of anything.
 
 **Revision predicts revision.** Revised once, 7.78% chance of being revised
-again. Twice, 17.82%. Three times, 22.94%. The count of prior revisions ships in
-`int_restatements` and needs no model.
+again. Twice, 17.82%. Three times, 22.94%. The count of prior revisions is
+already a column on `int_restatements`.
 
 **One restatement in nine is not a revision of a value.** Three categories,
 defined in advance and counted across the whole population: 6,950 zero-origin
@@ -53,12 +51,11 @@ artefacts to roughly 16%, and the rate from 4.785% to about 4.01%.
 The downward skew survives that. 57.76% of revisions are reductions; excluding
 all three artefact classes gives 60.02%, because those classes were diluting it.
 
-**Restating is normal, which inverts the data quality result.** 86.8% of
-companies restate something. 96% of large accelerated filers do, against 88% of
-non-accelerated, and large filers restate 40% more facts each. Data quality runs
-the other way: the smallest filers fail 0.54 rules on average against 0.07 for
-the largest. A screen built on filer size catches one problem and misses the
-other.
+86.8% of companies restate something, so restating is normal. 96% of large
+accelerated filers do, against 88% of non-accelerated, and large filers restate
+40% more facts each. Data quality runs the other way: the smallest filers fail
+0.54 rules on average against 0.07 for the largest. A screen built on filer size
+catches one problem and misses the other.
 
 ![Restatement rate by total-assets decile](docs/img/restatement_rate_by_size.png)
 
@@ -75,14 +72,14 @@ filings published on different dates. The partition key:
 (cik, coregistrant, segments, tag, period_end_date, qtrs, unit_of_measure)
 ```
 
-ordered by `filed_date`. `adsh` is absent on purpose. Comparing across filings is
-the mechanism.
+ordered by `filed_date`. `adsh` is deliberately absent: the comparison has to
+cross filings.
 
-Three of those columns are false-positive guards rather than identity, and they
-carry the result. Holding the method fixed, the restated share is 7.02% on
-`(cik, tag, period_end_date, qtrs, unit_of_measure)` alone and 4.785% on the full
-key. `segments` does almost all of that, by stopping segment-level figures being
-compared against consolidated totals.
+Three of those columns guard against false positives instead of establishing
+identity, and they carry the result. Holding the method fixed, the restated
+share is 7.02% on `(cik, tag, period_end_date, qtrs, unit_of_measure)` alone and
+4.785% on the full key. `segments` does almost all of that, by stopping
+segment-level figures being compared against consolidated totals.
 
 | Measure | Value |
 |---|---|
@@ -97,10 +94,10 @@ compared against consolidated totals.
 | Identifiable as artefact | ~16% |
 
 A change below 0.1% of the original value is treated as a change in reported
-precision, not a restatement. That threshold is a judgement call rather than
-something the distribution suggested, and
-[`docs/findings.md`](docs/findings.md) §2.8 gives the sensitivity: moving it
-across two orders of magnitude moves the rate from 5.12% to 3.59%.
+precision, not a restatement. I picked that threshold; nothing in the
+distribution suggested a natural cut, so [`docs/findings.md`](docs/findings.md)
+§2.8 gives the sensitivity instead: moving it across two orders of magnitude
+moves the rate from 5.12% to 3.59%.
 
 ## Filing behaviour
 
@@ -110,15 +107,15 @@ amends removes pre-2023 originals from both sides at once. The gradient inverts
 the data quality one: large accelerated filers publish fastest and amend slowest,
 159 days against 92.
 
-**Promptness has not drifted over twelve quarters.** No form-and-status series
-clears r² = 0.5. Seasonality swings 27 days inside one year against a fitted
+Promptness has not drifted over twelve quarters. No form-and-status series
+clears r² = 0.5, and seasonality swings 27 days inside one year against a fitted
 slope of zero. Reported as a negative result: the series is too short to rule out
 a drift of under a day per year.
 
-**2,862 companies file to the deadline habitually.** Established by runs of three
-or more consecutive filings, found with gap-and-island rather than a count, which
-is what separates them from the 1,141 intermittent companies that file at the
-deadline nearly as often but never in a run.
+2,862 companies file to the deadline habitually, established by runs of three or
+more consecutive filings and found with gap-and-island, not a count. That is what
+separates them from the 1,141 intermittent companies which file at the deadline
+nearly as often but never in a run.
 
 | Measure | Value |
 |---|---|
@@ -138,7 +135,7 @@ extension was invoked is unobservable here.
 ## What point-in-time discipline is worth
 
 Stage 4 prices the same idea against a prediction. Two feature tables over 58,726
-filings, same label, same five features, same trivial logistic regression. The
+filings, sharing a label, five features and one trivial logistic regression. The
 only difference is whether the company's prior-restatement count and its sector
 base rate were computed as of `filed_date` or over the whole loaded range.
 
@@ -151,19 +148,18 @@ random split lets the model recognise the company rather than predict anything.
 | Naive | 0.7172 to 0.7218 |
 | **Gap** | **0.1116 to 0.1278** |
 
-Between 0.11 and 0.13 of test AUC is information from after the filing date. That
-is the distance between a weak honest model and one that reads as a usable
-screen, and nothing on the naive table marks it. Same rows, same label, same five
-column names.
+Between 0.11 and 0.13 of test AUC is information from after the filing date: the
+distance between a weak honest model and one that reads as a usable screen. The
+two feature tables are otherwise identical, down to the column names.
 
 Almost all of it is one feature. `prior_restatement_count` over the full window
 scores 0.7180 alone, higher than the entire fitted naive model, because the
 restatement that sets the label is one of the events it counts. Point-in-time it
 scores 0.5669.
 
-The model is deliberately trivial and is not the deliverable. Default logistic
-regression, no tuning, no class weighting. A better model would raise both
-numbers.
+The model is deliberately trivial: default logistic regression, no tuning, no
+class weighting. The gap between the two feature sets is what the section
+measures, and a better model would raise both numbers.
 
 Rebuilt at 90, 120, 180, 240 and 270 day horizons, the gap sits between 0.115 and
 0.130 across the first four. The 270-day point is larger and discounted: its test
@@ -239,16 +235,22 @@ Requires Python 3.12 and Docker. dbt-core does not yet run on 3.13.
 
 `int_restatements` is deterministic: two consecutive builds return 426,706 rows
 with identical checksums. An earlier version tiebroke conflicting same-day values
-on accession number alone, which is not a total order when the conflict sits
-inside one filing, and consecutive builds disagreed.
+on accession number alone, which is fine when two filings land on the same date
+and useless when the conflict sits inside a single filing, because both rows then
+carry the same accession and the pick falls to whatever order the scan happened
+to return. One build then differed from the next by three rows and a checksum,
+small enough to look like noise instead of a bug. Ordering by `value` as a
+second tiebreaker makes the choice total. I left the reasoning in the model
+header, because it's exactly the kind of clause that looks decorative and gets
+deleted.
 
 ## Results
 
 `make results` writes six analysis tables to [`docs/results/`](docs/results/) as
 both CSV and JSON. CSV because GitHub renders it as a sortable table in the
 browser, so a reader can check a figure against the prose without cloning
-anything. JSON because comparison between runs is structural rather than
-row-wise, and a flat table cannot express a rule being added or removed.
+anything. JSON because comparison between runs is structural, not row-wise, and
+a flat table cannot express a rule being added or removed.
 
 `quality_metrics.json` is the committed baseline: data vintage, dataset totals
 and the six scorecard rules. `make metrics-check` re-runs those queries against
@@ -355,25 +357,25 @@ changed, not that the filer got it wrong. The classes leaving a numeric signatur
 are quantified at about 16%; a figure moving between two tags that both already
 carry non-zero values leaves no signature and is counted nowhere.
 
-**External accuracy is untested.** One internal identity is checked, assets
+External accuracy is untested. One internal identity is checked, assets
 against liabilities plus equity. Confirming figures against reality would need an
 independent source.
 
-**No root cause is confirmed against source filings.** All are inferred from
+No root cause is confirmed against source filings. All are inferred from
 aggregate data and sampled report sequences, and labelled established,
 hypothesised, or not established.
 
 **The point-in-time comparison rests on four tags and one cutoff.** Revenue under
 three tags plus `NetIncomeLoss`, consolidated, USD, annual. The 103 is what
-eighteen months of filings did to one fiscal year seen from 2024-06-30. No
-sensitivity across other cutoffs was run.
+eighteen months of filings did to one fiscal year seen from 2024-06-30. I ran no
+sensitivity across other cutoffs.
 
-**The AUC gap belongs to these two constructions.** A naive table leaking through
+The AUC gap belongs to these two constructions. A naive table leaking through
 fewer features would show less; one with more full-window aggregates would show
 more. The test period is six months, and the point-in-time model is additionally
 handicapped by a sector-rate warm-up a longer loaded range would remove.
 
-**Tag-type analysis joins on tag name alone**, ignoring taxonomy version.
+Tag-type analysis joins on tag name alone, ignoring taxonomy version.
 
 **236 rows were rejected at ingestion** and counted rather than dropped. They
 contain literal tab characters inside free-text fields, producing more fields

@@ -263,7 +263,7 @@ usually named:
    32,847 blocks instead of 1,835,626.
 2. The **join strategy** changed from merge to nested loop, and this is where
    most of the time went. A nested loop is only viable when the inner side has a
-   cheap random access path. Once it has one, neither input needs sorting , 
+   cheap random access path. Once it has one, neither input needs sorting,
    which deletes the 5 GB external merge outright. `temp` disappears from the
    `Buffers` line entirely.
 
@@ -277,7 +277,7 @@ There is a real cost on the other side of the ledger, visible in the same plan.
 255,605 separate index descents. The trade is 5.8M extra cached buffer touches
 in exchange for 3.3M fewer disk reads and 5 GB of eliminated temp I/O. On this
 hardware that trade is worth about 25×; on a machine where the whole table
-cached. It would be worth much less.
+cached, it would be worth much less.
 
 ### Timings
 
@@ -285,7 +285,7 @@ cached. It would be worth much less.
 |---|---|---|
 | Run 1 (cold page cache) | 55.723 s | **13.850 s** |
 | Subsequent runs | 56.969 s, 57.759 s | 2.907, 2.938, 2.428 s |
-| Steady state (runs 5–10) |, | 2.343, 2.306, 2.288, 2.305, 2.324, 2.305 s |
+| Steady state (runs 5–10) | n/a | 2.343, 2.306, 2.288, 2.305, 2.324, 2.305 s |
 | **Median** | **57.0 s** | **2.31 s** |
 | `EXPLAIN ANALYZE` execution | 56.137 s | 2.429 s |
 | Planner cost estimate | 6,264,850 | 239,173 (26× lower) |
@@ -447,7 +447,7 @@ Tested at 32, 8 and 2:
 
 | `pages_per_range` | Index size | Median wall clock | Plan chosen |
 |---|---|---|---|
-| no index |, | baseline | Parallel Seq Scan |
+| no index | none | baseline | Parallel Seq Scan |
 | 128 (default) | 376 kB | 6.36 s | Parallel Seq Scan |
 | 32 | 1472 kB | 11.72 s | Parallel Seq Scan |
 | 8 | 5824 kB | 11.40 s | Parallel Seq Scan |
@@ -525,7 +525,7 @@ quantity and the table is append-only, and neither fact was sufficient.
 |---|---|---|
 | Baseline, no index (9 runs, interleaved) | **8.04 s** | 10.105, 8.044, 7.482 · 6.886, 6.557, 6.692 · 10.110, 10.151, 9.985 |
 | BRIN, 376 kB | 6.36 s | 6.355, 6.499, 6.359 |
-| BRIN forced with `enable_seqscan=off` | 10.47 s |, |
+| BRIN forced with `enable_seqscan=off` | 10.47 s | not recorded |
 | B-tree, 283 MB | **1.01 s** | 14.473 (first run), 1.006, 0.971, 1.017 |
 
 The baseline's own spread is 6.56–10.15 s, a ±25% band, and it is not random
@@ -552,7 +552,7 @@ heap physically grouped by `filed_date`. Two routes:
    ordered and the table approximately ordered overall.
 
 Neither was done. Route 1 is not durable under this model's write pattern, and
-route 2 changes a working model for the benefit of an index that is not needed , 
+route 2 changes a working model for the benefit of an index that is not needed:
 the B-tree costs 283 MB and solves the problem today. Recording the mechanism is
 the deliverable; changing the model is not.
 
@@ -723,7 +723,7 @@ the same question 16,035 times instead of once.
 | **End-to-end speedup** | **2.8×** | **18.6×** |
 | Shared scan floor (the `reports` CTE) | 10.31 s | ~10.3 s |
 | Time attributable to the rewritten step | 19.62 s → 10.1 ms | 181.9 s → ~10 ms |
-| **Speedup on the step replaced** | **≈1,950×** |, |
+| **Speedup on the step replaced** | **≈1,950×** | n/a |
 
 **The 2.8× at scope A is the honest headline, and it is small.** Both forms pay
 the same ~10.4 s to scan a 14 GB table that does not fit in the page cache, and
@@ -761,7 +761,7 @@ progressively slower:
 | Same query, same plan | Session start | Mid-session | Later | After VM restart |
 |---|---|---|---|---|
 | Case 2 baseline | 7.86–8.20 s | 11.30–11.76 s | 14.68–14.95 s | 6.56–10.15 s |
-| Case 1 baseline | 40.90–41.68 s | 57.34–60.05 s |, | 55.72–57.76 s |
+| Case 1 baseline | 40.90–41.68 s | 57.34–60.05 s | not measured | 55.72–57.76 s |
 
 The host was never under obvious pressure (41% free memory, load average 4.5 on
 12 cores). The degradation was confined to I/O: the Case 2 baseline's `shared

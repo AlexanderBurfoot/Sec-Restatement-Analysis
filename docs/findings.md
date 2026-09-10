@@ -1,11 +1,11 @@
 # Findings
 
-**Report date:** §1 2026-08-28 · §2 2026-08-30 · §3 2026-08-31
+**Report date:** §1 2026-08-28 · §2 2026-08-30 · §3 2026-08-31 · §4 2026-09-01
 **Data vintage:** SEC Financial Statement Data Sets, 2023Q1–2025Q4, downloaded 2026-08-23
 **Dataset:** 81,720 filings · 42,797,341 numeric facts · 426,706 detected restatements
 **Environment:** PostgreSQL 16.15 · dbt-core 1.12.3 · dbt-postgres 1.11.0 · Python 3.12.14
 **Reference point:** §1 at tag `v1-data-quality`; §2 at tag `v2-restatements`;
-§3 at tag `v3-filing-behaviour`
+§3 at tag `v3-filing-behaviour`; §4 at tag `v4-point-in-time`
 **Author:** Alexander Burfoot
 
 Every figure in this document is reproducible from the repository at the tag
@@ -183,14 +183,14 @@ What was **not** tested matters as much as what was.
 | **Accuracy (external)** | **No** | Requires an independent source of truth for the same figures |
 | **Semantic correctness** | **No** | Whether a filer chose the *right* tag is not assessable from this data |
 
-Two absences are worth stating plainly.
+Two absences matter.
 
-**External accuracy is untested.** Nothing in this dataset reveals whether a
+External accuracy is untested. Nothing in this dataset reveals whether a
 reported revenue figure is correct. §1.10 tests one internal identity that must
 hold by construction, but confirming accuracy generally would require
 reconciling against audited statements or a second commercial data source.
 
-**No across filing reconciliation was performed.** A figure reported for a
+No across filing reconciliation was performed. A figure reported for a
 period in one filing is not checked against the same figure reported for that
 period in a later filing. That comparison is restatement detection and is the
 subject of §2.
@@ -312,12 +312,12 @@ cover. Nothing in this data distinguishes between them.
 Two distinct phenomena sit under "a tag used with more than one unit", and only
 one is a problem.
 
-**Multi currency reporting is not an error.** Tags such as `Assets` appear under
+Multi currency reporting is not an error. Tags such as `Assets` appear under
 43 different currency codes because foreign private issuers report in their home
 currency. That is correct reporting. It does mean these tags cannot be summed
 across filers without FX conversion, a naive aggregate adds yen to euros.
 
-**Mixed unit *types* are a different matter.** Where one tag carries both
+Mixed unit *types* are a different matter. Where one tag carries both
 currency and non currency units, it is measuring two different things depending
 on who filed it: a share count for one filer, a dollar amount for another.
 
@@ -334,7 +334,7 @@ either how many warrants were exercised or what the exercise was worth, and both
 readings are defensible in isolation. A few are simply wrong: `gal` (gallons) on
 a share options tag, and `pure` on `Revenue`.
 
-**The split by tag type is the substantive finding:**
+The split by tag type is the substantive finding:
 
 | Tag type | Tags with mixed unit types |
 |---|---|
@@ -360,12 +360,13 @@ name that is custom for one filer and standard elsewhere would be counted once.
 value. This is the largest defect in the report by four orders of magnitude, and
 the only one big enough to move an aggregate.
 
-**Abstract tags are not the explanation.** These are presentation only section
+Abstract tags are not the explanation. These are presentation only section
 headers that carry no value by design and would have diluted the rate if
 present. None appear in the fact table at all. They are abstract elements
 that live in the presentation file, not the numeric one. The 4.44% needs no adjustment.
 
-**Custom tags are substantially has a higher proportion of null values than standard ones.**
+Custom tags carry a substantially higher proportion of null values than
+standard ones:
 
 | Tag type | Facts | Nulls | % null |
 |---|---|---|---|
@@ -378,12 +379,12 @@ third distinct way extensions underperform, after non comparability (§1.3) and
 unit type inconsistency (§1.4), a filer defining its own element is more likely
 to leave it empty than to leave a standard one empty.
 
-**The rate is also concentrated by filer.** Several companies in §1.11 report
+The rate is also concentrated by filer. Several companies in §1.11 report
 null rates above 40%. HYPERSCALE DATA is at 42.1%. FOXO TECHNOLOGIES is at 40.7%.
 PROPANC BIOPHARMA is at 40.4%. These values are against the 4.44% population rate.
 The defect is driven by a subset of filers rather than spread evenly across the source.
 
-**Root cause is not established.** The candidates are a filer tagging a line
+*Root cause: not established.* The candidates are a filer tagging a line
 item that does not apply to the period, an extraction failure in the SEC's own
 processing, or elements functioning as headers without carrying the abstract
 flag. The extension correlation is consistent with the first, since a
@@ -402,8 +403,9 @@ The natural key of a numeric fact is
 covering 300 rows appear more than once *within a single filing*, each time with
 two different values.
 
-They concentrate in derivative disclosures which are: `DerivativeLiabilityNotionalAmount`,
-`DerivativeAssetFairValueGrossLiability`, and in a small number of filers.
+They concentrate in two derivative disclosure tags,
+`DerivativeLiabilityNotionalAmount` and `DerivativeAssetFairValueGrossLiability`,
+and in a small number of filers.
 
 Duplicate keys with identical values would be harmless redundancy. These are
 not: every one of the 154 groups carries two distinct values, so a query
@@ -425,9 +427,9 @@ specification rather than the data.
 tab character inside a free text field, producing more fields than the file's
 own header declares.
 
-Such a row cannot be repaired reliably as there is no way to know which field the
-stray tab split, so they are rejected and counted rather than silently dropped
-or half parsed.
+Such a row cannot be repaired reliably, because there is no way to know which
+field the stray tab split, so it is rejected and counted rather than silently
+dropped or half parsed.
 
 | Quarter | Rejected | | Quarter | Rejected |
 |---|---|---|---|---|
@@ -540,7 +542,7 @@ difference between them should validate the sign rather than trust it.
 
 ---
 
-**What is not covered here.** No root cause is confirmed by inspection of source
+What is not covered here. No root cause is confirmed by inspection of source
 filings; all are inferred from the aggregate data. No estimate of financial
 materiality is offered, since that would require assumptions about downstream
 use that this analysis does not make. Remediation ownership is assigned on where
@@ -562,7 +564,7 @@ high severity event based rules were sampled and reviewed individually.
 | DQ-02 Duration exceeds ten years | 951 facts | full population by band | 15 | 936 |
 | DQ-03 Conflicting duplicates | 154 groups | 20 | 20 | 0 |
 
-**DQ-06: all four confirmed, and none are ordinary filings.** PowerSchool
+DQ-06: all four confirmed, and none are ordinary filings. PowerSchool
 Holdings filed a 10-Q on 2024-05-07 for a period ending 2024-12-31, 238 days in
 the future; Power REIT the same, 235 days. The other two (an S-4/A registration
 amendment and a 6-K foreign issuer report) are not periodic reports at all.
@@ -571,8 +573,8 @@ occurred rather than the period actually reported on. The defect is real, but it
 is better described as a field semantics problem than a date error: 'period'
 does not always mean what a consumer would assume.
 
-**DQ-02: the threshold is too aggressive and most flagged rows are probably
-legitimate.** Splitting the 951 facts by duration:
+DQ-02: the threshold is too aggressive and most flagged rows are probably
+legitimate. Splitting the 951 facts by duration:
 
 | Duration band | Facts | Filings |
 |---|---|---|
@@ -586,13 +588,13 @@ legitimate basis that genuinely produces multi decade durations. Only the 200+
 band, 15 facts across 2 filings, is unambiguously defective; the extreme case
 claims 3,604 quarters, or 901 years.
 
-This is a false positive finding against my own rule. The `qtrs > 40` bound was
-chosen to sit clear of normal reporting, and it does, but it does not sit clear
-of *unusual but valid* reporting. A consumer wanting only genuine defects should
-use a far higher bound. The rule as stated is retained, with this caveat, rather
-than silently retuned.
+This is a false positive finding against one of this report's own rules. The
+`qtrs > 40` bound was chosen to sit clear of normal reporting, and it does,
+but it does not sit clear of *unusual but valid* reporting. A consumer wanting
+only genuine defects should use a far higher bound. The rule as stated is
+retained, with this caveat, rather than silently retuned.
 
-**DQ-03: All twenty confirmed, and the gaps are not rounding.** The sampled
+DQ-03: all twenty confirmed, and the gaps are not rounding. The sampled
 groups show differences up to 9,000%, and in most cases the two values carry
 **opposite signs**: −91,000 against −1,000, −168,000 against +2,000, −4,969,000
 against +301,000. These are not precision artifacts. A consumer selecting either
@@ -605,7 +607,7 @@ considerably: this looks like one company's derivative disclosure process rather
 than a systemic tagging problem, which is consistent with the concentration
 result in §1.11.
 
-**What verification did not cover.** The rate based rules (DQ-01 nulls, custom
+What verification did not cover. The rate based rules (DQ-01 nulls, custom
 tag share) were not sampled, since "is this row genuinely null" is not a
 judgement an inspection can improve on. Verification was against the loaded data,
 not against the original filings on EDGAR. A row that is internally implausible
@@ -620,11 +622,11 @@ Every other rule tests whether a value is present, plausible, or unambiguously
 keyed. None test whether it is *right*. One internal identity can be checked
 without an external source: assets must equal liabilities plus equity.
 
-**Coverage.** 166,270 consolidated balance sheets were assembled across 8,252
-companies. 156,618 (94.2%) carry the filer's own reported
+166,270 consolidated balance sheets were assembled across 8,252 companies.
+156,618 (94.2%) carry the filer's own reported
 `LiabilitiesAndStockholdersEquity` total and can be tested directly.
 
-**Threshold, chosen from the distribution.**
+The threshold comes from the gap distribution:
 
 | Gap band | Filings |
 |---|---|
@@ -643,17 +645,16 @@ rounding at the precision filers actually report. Counts then collapse to 3 and
 the materiality bound which was chosen from the observed shape rather than picked in
 advance.
 
-**Result.** 99.92% of testable balance sheets balance exactly. This is the first
-rule where the data overwhelmingly passes, which is worth stating in a report
-otherwise listing defects.
+99.92% of testable balance sheets balance exactly. This is the first rule
+where the data overwhelmingly passes, in a report otherwise listing defects.
 
 Twelve filings exceed the threshold. **All twelve are non accelerated filers.**
 The largest is a shell sized balance sheet reporting $5 in assets against $5,379
-in liabilities and equity. One company, NEXT MEATS HOLDINGS, appears twice. This is because
-a 10-Q and its own 10-Q/A amendment, is carrying the identical imbalance. The
+in liabilities and equity. One company, NEXT MEATS HOLDINGS, appears twice:
+a 10-Q and its own 10-Q/A amendment carry the identical imbalance. The
 amendment did not correct it.
 
-**A check that does not work.** The same identity can be tested by summing
+A check that does not work. The same identity can be tested by summing
 components (`Assets = Liabilities + StockholdersEquity`) rather than using the
 filer's reported total. That form produces roughly 50,000 apparent failures
 against 12 from the reported total form. Two explanations were tested:
@@ -667,7 +668,7 @@ components form is therefore not used, and the finding is recorded as a
 methodological result: a naive two-term implementation of this identity would
 report a defect rate four orders of magnitude too high.
 
-**Limitations.** Consolidated USD figures only; segment and subsidiary
+Three limits apply. Consolidated USD figures only; segment and subsidiary
 breakdowns are excluded because they do not balance independently. Form types
 are not filtered, so two proxy statements appear among the twelve. Where a tag
 appears twice within a filing with conflicting values (DQ-03), one is selected
@@ -688,13 +689,13 @@ the population rate, and four event based, flagged on any occurrence.
 | 2 | 338 | 3.9 |
 | 3 | 3 | 0.03 |
 
-**Defects are concentrated, not systemic.** Seven filers in ten fail nothing.
+Defects are concentrated, not systemic. Seven filers in ten fail nothing.
 Only three of 8,693 fail three or more rules. This is a minority of filers
 problem, which makes filer level screening a more effective remediation than
 blanket filtering. This is a materially different recommendation from what the raw
 counts alone would suggest.
 
-**Quality grades with filer size.**
+Quality also grades with filer size:
 
 | Filer status | Filers | Mean rules failed | Failing 3+ |
 |---|---|---|---|
@@ -708,10 +709,10 @@ population, after extension tag share (§1.3), unit type inconsistency (§1.4),
 and every balance sheet violation (§1.10). Four different checks, four times the
 same answer.
 
-**Repeat offenders.** The three filers failing three rules are REGEN BIOPHARMA,
-THERAPEUTIC SOLUTIONS INTERNATIONAL, and NEXT MEATS HOLDINGS. All are
-non accelerated. NEXT MEATS also appears in §1.10, failing an independent
-accuracy check as well as the completeness and comparability ones.
+The three filers failing three rules are REGEN BIOPHARMA, THERAPEUTIC
+SOLUTIONS INTERNATIONAL, and NEXT MEATS HOLDINGS. All are non accelerated.
+NEXT MEATS also appears in §1.10, failing an independent accuracy check as
+well as the completeness and comparability ones.
 
 Null rates among the worst filers are extreme: 42.1% at HYPERSCALE DATA, 40.7%
 at FOXO TECHNOLOGIES, 40.4% at PROPANC BIOPHARMA, against a 4.44% population
@@ -723,7 +724,7 @@ accelerated and fails two rules, but on conflicting duplicate keys rather than
 the null and extension profile that characterises the rest. A different failure
 mode entirely.
 
-**Limitations.** The two rate thresholds, twice the population null rate, and
+Three caveats. The two rate thresholds, twice the population null rate, and
 20% custom tags, are chosen, not derived from the distributions. Event based
 rules flag on a single occurrence, so a filer with one bad row ranks alongside
 one with hundreds. Most importantly, the six rules are **not independent**:
@@ -781,7 +782,7 @@ headline rate by 1.44×, because a segment level figure would be compared agains
 the consolidated total and the difference read as a revision. `coregistrant`
 barely moves the rate. It is cheap correctness rather than a large effect.
 
-**The rounding threshold is 0.001, one tenth of one percent** of the first
+The rounding threshold is 0.001, **one tenth of one percent** of the first
 reported value, set in `dbt_project.yml` as
 `restatement_rounding_threshold`. A later value differing from the first by less
 than that is treated as a change in reported precision rather than a
@@ -795,7 +796,7 @@ material by fiat: there is no ratio to test, and a figure that was zero and is
 now not zero is a change of kind rather than of precision. 6,950 restatements
 (1.6%) are of this form.
 
-**Population.** 8,918,472 described facts were reported on more than one date and
+8,918,472 described facts were reported on more than one date and
 so could have been revised. 426,706 of them were, across 7,544 of 8,693 companies
 (86.8%) and 15,438 distinct tags. **The restatement rate is 4.785%** the low
 single-digit figure the design predicted, against the 16% that the incomplete key
@@ -844,12 +845,10 @@ directly observable in the report sequences and mutually consistent.
 
 ### 2.1 Which sectors restate most
 
-**The question.** Do some industries revise their reported figures more than
-others, once size is accounted for?
-
-**What the query does.** `rst_by_sector` maps SIC codes to divisions and
-two-digit major groups, then aggregates over `GROUPING SETS` at both levels plus
-a grand total. Sector is taken from the `dim_company` SCD2 version current at
+Do some industries revise their reported figures more than others, once size
+is accounted for? `rst_by_sector` maps SIC codes to divisions and two-digit
+major groups, then aggregates over `GROUPING SETS` at both levels plus a grand
+total. Sector is taken from the `dim_company` SCD2 version current at
 `first_filed_date`. The industry the company reported from when the original
 number was published, never its present-day SIC. Both the numerator and the
 denominators use that same as-at rule, so a reclassification cannot move a
@@ -871,12 +870,12 @@ filing more, and dividing by exposure is what makes the sectors comparable.
 | Unclassified (no SIC) | 13,564 | 941,190 | 1.441 | 87.79 | 52.51 | 75.0% |
 | **All sectors** | **426,706** | **8,918,472** | **4.785** | **86.78** | **57.76** | **42.4%** |
 
-**The number.** Excluding the unclassified bucket, sector rates run from 4.11%
+Excluding the unclassified bucket, sector rates run from 4.11%
 (Construction) to 6.88% (Agriculture), a spread of 1.7×. At major-group level
 the spread widens to 3×, from 2.81% (major group 42, trucking and warehousing) to
 8.60% (major group 14, mining of nonmetallic minerals).
 
-**What it means.** The sector effect is real but modest, and it is much weaker
+The sector effect is real but modest, and it is much weaker
 than §1's filer-size effect on data quality, which ran to 8×. Industry is not a
 useful screen on its own: every division restates between 4% and 7% of its
 revisable facts, and no sector is clean. Two secondary patterns are more usable
@@ -887,7 +886,7 @@ Manufacturing and Agriculture revise downward most often (62%), against 52% for
 Finance, restatements in the goods-producing sectors are disproportionately
 reductions.
 
-**The unclassified bucket is an artefact and should not be read as a sector.**
+The unclassified bucket is an artefact and should not be read as a sector.
 Its 1.441% rate is the lowest in the table by 3×, and the cause is the
 denominator, not clean reporting: 941,190 revisable facts across only 213
 companies, roughly 4,400 each against 861 for Manufacturing. All 13,564 of its
@@ -908,10 +907,10 @@ separates them.
 
 ### 2.2 How large are revisions
 
-**The question.** When a figure is revised, by how much, and does the revision
-run in a systematic direction?
+When a figure is revised, by how much, and does the revision run in a
+systematic direction?
 
-**What the query does.** `rst_magnitude_distribution` buckets every restatement
+`rst_magnitude_distribution` buckets every restatement
 twice over: `width_bucket` on a linear 5-point scale from 0 to 100% of the
 original value, and again on a log10 scale by decade, because the observed spread
 runs from a tenth of a percent to thirteen orders of magnitude above it and a
@@ -941,10 +940,10 @@ The linear histogram is bimodal, which is the substantive shape:
 | 95–100% | 29,899 | 7.12 |
 | >100% | 113,069 | 26.94 |
 
-**The number.** The median revision is 42.4% of the original figure. A quarter of
+The median revision is 42.4% of the original figure. A quarter of
 all restatements fall in the 0–5% band, and another quarter exceed 100%.
 
-**What it means.** Two things, and the second is more important than the first.
+Two things here, and the second is more important than the first.
 
 First, **restatements skew downward, but only slightly.** 57.76% are reductions
 and the median signed revision is −1.80%. The direction asymmetry is real and
@@ -980,19 +979,16 @@ re-presentation rather than correction.
 
 ### 2.3 Which line items get revised
 
-**The question.** Do revisions concentrate on particular financial statements, or
-particular line items?
-
-**What the query does.** `rst_by_statement` joins restatements to `dim_tag` for
-statement placement. `int_restatements` is keyed on `tag` without
-`taxonomy_version` while `dim_tag` is keyed on both, so the dictionary is first
-collapsed to tag grain by modal statement across the versions that define the
-tag; a tag placed on more than one statement is flagged
-(`placement_is_ambiguous`) rather than quietly assigned. Denominator is again
-revisable facts, so a tag reported on every filing does not accumulate
-restatements by exposure alone. Statement and grand totals are computed over
-every tag; only the tag-level detail is trimmed to the top 15, so a total is
-never the sum of the rows displayed beneath it.
+Do revisions concentrate on particular financial statements, or on particular
+line items? `rst_by_statement` joins restatements to `dim_tag` for statement
+placement. `int_restatements` is keyed on `tag` without `taxonomy_version`
+while `dim_tag` is keyed on both, so the dictionary is first collapsed to tag
+grain by modal statement across the versions that define the tag; a tag placed
+on more than one statement is flagged (`placement_is_ambiguous`) rather than
+quietly assigned. Denominator is again revisable facts, so a tag reported on
+every filing does not accumulate restatements by exposure alone. Statement and
+grand totals are computed over every tag; only the tag-level detail is trimmed
+to the top 15, so a total is never the sum of the rows displayed beneath it.
 
 | Statement | Restatements | Revisable facts | % restated | Distinct tags | Companies | % downward | Median revision |
 |---|---|---|---|---|---|---|---|
@@ -1020,10 +1016,10 @@ Most-revised individual tags:
 | `SharesOutstanding` | EQ | 5,844 | 9.73 | 1,048 | 95.5% |
 | `Assets` | BS | 4,808 | 7.04 | 1,462 | 6.9% |
 
-**The number.** The income statement is revised at **7.29%** of revisable facts,
+The income statement is revised at **7.29%** of revisable facts,
 1.7× the balance sheet's 4.27% and 6× supplementary information's 1.20%.
 
-**What it means.** **Revisions concentrate on the statement people actually read.**
+Revisions concentrate on the statement people actually read.
 The income statement is the most revised, and within it the most-revised items are
 the headline ones: revenue, operating income, and earnings per share. Earnings per
 share is the single most frequently revised concept in the dataset at 10.5% of
@@ -1034,14 +1030,14 @@ smallest of any major tag.
 
 Two caveats on this table, both material:
 
-**The EPS medians of 200–300% are a small-denominator effect, not a measure of
-error size.** Median first reported EPS among restated facts is $0.41 and the
+The EPS medians of 200–300% are a small-denominator effect, not a measure of
+error size. Median first reported EPS among restated facts is $0.41 and the
 median absolute change is $0.965, so a swing from $0.41 to −$0.55 registers as a
 235% revision. EPS percentages are not comparable with revenue or asset
 percentages and should not be pooled with them. The *frequency* (10.5%) is sound;
 the magnitude is not.
 
-**The ~95% medians on share-count tags are reverse splits.** See §2.7  47% of
+The ~95% medians on share-count tags are reverse splits. See §2.7: 47% of
 share-denominated restatements carry a near-integer shrink ratio, against a 2.45%
 base rate on USD facts.
 
@@ -1057,10 +1053,9 @@ where balance sheet items are more often directly measured. Not tested here.
 
 ### 2.4 Do restatements cluster in time
 
-**The question.** Do revisions bunch into particular quarters, or arrive at a
-steady rate?
+Do revisions bunch into particular quarters, or arrive at a steady rate?
 
-**What the query does.** `rst_clustering` asks the question on two clocks, because
+`rst_clustering` asks the question on two clocks, because
 "when" is ambiguous here: the quarter a revision was *published*, and the quarter
 whose figures it *revised*. Each carries its own denominator (publication
 divides by filings published that quarter, the period clock by revisable facts
@@ -1074,7 +1069,7 @@ level before it rather than a baseline it is itself inflating.
 
 | Quarter | Restatements | Filings | Per 1k filings | vs 4-quarter trailing rate |
 |---|---|---|---|---|
-| 2023 Q1 | 1,418 | 6,754 | 210.0 |, |
+| 2023 Q1 | 1,418 | 6,754 | 210.0 | n/a |
 | 2023 Q2 | 13,341 | 8,039 | 1,659.5 | 7.90 |
 | 2023 Q3 | 13,928 | 7,067 | 1,970.9 | 2.11 |
 | 2023 Q4 | 19,034 | 6,882 | 2,765.8 | 2.16 |
@@ -1087,14 +1082,14 @@ level before it rather than a baseline it is itself inflating.
 | 2025 Q3 | 43,181 | 6,541 | 6,601.6 | 0.91 |
 | 2025 Q4 | 45,484 | 6,304 | 7,215.1 | 1.00 |
 
-**The number.** From 2024 Q2 onward the rate holds between 6,392 and 7,929 per
-1,000 filings (a band of −9% to +12% around a mean of 7,050. The apparent 39×
-ramp from 2023 Q1 to 2024 Q1 is **not a finding) it is the detector warming
+From 2024 Q2 onward the rate holds between 6,392 and 7,929 per
+1,000 filings, a band of −9% to +12% around a mean of 7,050. The apparent 39×
+ramp from 2023 Q1 to 2024 Q1 is **not a finding: it is the detector warming
 up.**
 
-**What it means. Restatements do not cluster, and the section's main result is a
-negative one.** A revision can only be observed if the original report is also inside the loaded window. In
-2023 Q1 there is no prior data at all, so almost nothing *can* register as a
+Restatements do not cluster, and the section's main result is a negative one.
+A revision can only be observed if the original report is also inside the
+loaded window. In 2023 Q1 there is no prior data at all, so almost nothing *can* register as a
 revision; by 2024 Q1 there is a full year of originals to revise. The
 `count_vs_trailing` ratio of 4.94 at 2024 Q1 would read as a dramatic spike to
 anyone taking the column at face value, and it is entirely an artefact of a
@@ -1141,18 +1136,16 @@ denominators, agree that the rate is stable once censoring is excluded.
 
 ### 2.5 Does one restatement predict another
 
-**The question.** Given that a figure has been revised once, is it more likely to
-be revised again?
-
-**What the query does.** `int_restatements` compares first value against latest,
-which collapses a fact revised three times into a single row, it cannot answer
-this question. `rst_amendment_chains` rebuilds the full report sequence and walks
-it with a **recursive CTE**: each link is a material change from the *previous*
-report rather than from the first, so a fact revised three times becomes one chain
-of length three. The recursion carries the accession path and the value the chain
-started from, neither of which a plain aggregate over the steps could produce in
-order. The same collapse-and-tiebreak rule as `int_restatements` is used, so a
-chain cannot count a revision the restatement model does not recognise.
+Given that a figure has been revised once, is it more likely to be revised
+again? `int_restatements` compares first value against latest, which collapses
+a fact revised three times into a single row, it cannot answer this question.
+`rst_amendment_chains` rebuilds the full report sequence and walks it with a
+**recursive CTE**: each link is a material change from the *previous* report
+rather than from the first, so a fact revised three times becomes one chain of
+length three. The recursion carries the accession path and the value the chain
+started from, neither of which a plain aggregate over the steps could produce
+in order. The same collapse-and-tiebreak rule as `int_restatements` is used,
+so a chain cannot count a revision the restatement model does not recognise.
 
 | Chain length | Chains | Companies | Median span (days) |
 |---|---|---|---|
@@ -1176,33 +1169,34 @@ Read as a conditional hazard:
 | 4 | 1,402 | 298 | 21.26 |
 | 5 | 298 | 119 | 39.93 |
 
-**The number.** A fact that has been revised once has a **7.78%** chance of being
+A fact that has been revised once has a **7.78%** chance of being
 revised again. A fact that has been revised twice has **17.82%** 2.3× higher. A
 fact revised three times has 22.94%.
 
-**What it means. Yes, and strongly.** The hazard more than doubles after the
-second revision and keeps rising. This is the most actionable result in §2: a
-figure with two revisions already against it is not merely a figure that has
-settled after some turbulence, it is a figure roughly three times more likely than
-a once-revised one to move again. For a consumer, the number of prior revisions on
-a fact is a usable risk signal, and it is available in `int_restatements` as
-`n_reports` and `n_distinct_values` without any additional modelling.
+Yes, and strongly. The hazard more than doubles after the second revision and
+keeps rising. This is the most actionable result in §2: a figure with two
+revisions already against it is not merely a figure that has settled after
+some turbulence, it is a figure roughly three times more likely than a
+once-revised one to move again. For a consumer, the number of prior revisions
+on a fact is a usable risk signal, and it is available in `int_restatements`
+as `n_reports` and `n_distinct_values` without any additional modelling.
 
 Chain span is nearly constant at one year for lengths 1 through 6, which is the
 §2 headline mechanism again: each additional link is one more annual comparative.
 
-**Chain population reconciliation.** The chain model counts 441,020 chains against
-426,706 restatements. The two populations are defined differently and the gap is
-expected: chains count step-to-step departures, so a fact revised away and then
-restored to its original value is a chain of length 2 but not a restatement at all,
-since `int_restatements` tests first against latest. There are 16,829 such
-revised-and-restored facts, which more than accounts for the 14,314 difference;
-the offset in the other direction is multi-step chains whose individual steps fall
-below the rounding threshold while the cumulative move does not.
+The chain model counts 441,020 chains against 426,706 restatements. The two
+populations are defined differently and the gap is expected: chains count
+step-to-step departures, so a fact revised away and then restored to its
+original value is a chain of length 2 but not a restatement at all, since
+`int_restatements` tests first against latest. There are 16,829 such
+revised-and-restored facts, which more than accounts for the 14,314
+difference; the offset in the other direction is multi-step chains whose
+individual steps fall below the rounding threshold while the cumulative move
+does not.
 
-**Filer concentration.** One company dominates: **Grupo Financiero Galicia** holds
-2,721 chains of which 979 are length 3 or more, 36% long chains, against a
-population-wide 1.39%. §2.7 establishes why, and it is not a control failure.
+One company dominates: **Grupo Financiero Galicia** holds 2,721 chains of
+which 979 are length 3 or more, 36% long chains, against a population-wide
+1.39%. §2.7 establishes why, and it is not a control failure.
 
 *Root cause: hypothesised.* Rising hazard is consistent with a subset of facts
 being genuinely difficult to measure (estimates that keep being refined) rather
@@ -1213,10 +1207,10 @@ per-fact propensity from a causal chain.
 
 ### 2.6 Serial restaters
 
-**The question.** Which companies restate repeatedly, and is it a sustained run
-of bad periods or an occasional scatter?
+Which companies restate repeatedly, and is it a sustained run of bad periods
+or an occasional scatter?
 
-**What the query does.** `rst_serial_restaters` ranks filers by `NTILE(10)` on the
+`rst_serial_restaters` ranks filers by `NTILE(10)` on the
 share of their reporting periods that carry a restatement, then separates runs
 from scatters with a **gap-and-island** construction: subtracting a dense sequence
 over the restated periods from the sequence over all reported periods leaves a
@@ -1250,18 +1244,18 @@ carrying 26,411 restatements between them.
 | 9 | 697 | 74.39 | 56,994 | 14.24 |
 | 10 | 697 | 83.46 | 130,761 | **32.67** |
 
-**The number.** The top decile, 697 companies, accounts for **32.67%** of all
+The top decile, 697 companies, accounts for **32.67%** of all
 restatements. The top two deciles account for 46.9%. And **4,685 companies, 54% of
 all filers, show a sustained run of three or more consecutive restated periods.**
 
-**What it means. Restating is normal, and that is the finding.** §1.11 found
-defects concentrated in a minority of filers: 69% failed no data quality rule at
-all. Restatements behave nothing like that. 86.8% of companies restate something,
-54% do it in sustained runs, and the top decile holds only a third of the volume.
-This is concentrated, but nowhere near the winner-take-all shape of the §1 defects.
+Restating is normal, and that is the finding. §1.11 found defects concentrated
+in a minority of filers: 69% failed no data quality rule at all. Restatements
+behave nothing like that. 86.8% of companies restate something, 54% do it in
+sustained runs, and the top decile holds only a third of the volume. This is
+concentrated, but nowhere near the winner-take-all shape of the §1 defects.
 
-**This inverts §1's central result, and the inversion is the most important
-cross-section in the report.** Restatement volume is a *large*-filer phenomenon:
+This inverts §1's central result, and the inversion is the most important
+cross-section in the report. Restatement volume is a *large*-filer phenomenon:
 
 | Filer status | Companies | % restated of revisable | Mean restatements per company | % of companies restating |
 |---|---|---|---|---|
@@ -1288,7 +1282,7 @@ The top of the volume ranking is accordingly full of household names, not shells
 | GENERAL ELECTRIC CO | 3600 | 12 | 8 | 66.7 | 836 | 102 | 8 |
 | AMBAC FINANCIAL GROUP INC | 6351 | 12 | 9 | 75.0 | 817 | 113 | 9 |
 
-**These are not accusations of misreporting.** A large filer reports far more
+These are not accusations of misreporting. A large filer reports far more
 facts, so it has far more opportunities to revise one, and a company that
 re-presents a full set of comparatives each year generates a long run
 mechanically. The `none` category showing a mean of 0.4 restatements is the same
@@ -1540,8 +1534,8 @@ sign correction. The values cannot say which. The claim the category supports is
 narrower than "all 29,118 are conventions". It is that in none of them did the
 reported magnitude change, so none is a revision of a value, whatever else it is.
 
-**Direction, tested against the other three.** §2.2 reports 57.76% of revisions
-as reductions. A sign flip has an identical magnitude, so calling it an increase
+The fourth check tests the direction result against the other three classes.
+§2.2 reports 57.76% of revisions as reductions. A sign flip has an identical magnitude, so calling it an increase
 or a decrease is meaningless. `revision_direction` reads the sign of
 `absolute_revision`, which for a flip is entirely an artefact of the convention
 that changed. If the downward skew were manufactured by these categories,
@@ -1587,11 +1581,10 @@ They overlap, so they cannot be added.
 | Sub-1% precision re-reports | sampling | ~4,420 | none |
 | **Union** | | **~69,500** | **16.3% of the population** |
 
-The union's last figure is approximate and the reason is worth stating rather
-than smoothing over. Reproducing the scale-change predicate at the tolerance used
-for the direct counts returns 14,044 rather than the 11,846 tabulated above, so
-the union sits between roughly 67,000 and 69,500. Call it 16% of the population,
-give or take half a point.
+The union's last figure is approximate. Reproducing the scale-change predicate
+at the tolerance used for the direct counts returns 14,044 rather than the
+11,846 tabulated above, so the union sits between roughly 67,000 and 69,500.
+Call it 16% of the population, give or take half a point.
 
 Retroactive share splits (23,839) are disjoint from all three directly counted
 categories. A split on a share count is a shrink of less than 100%, so it can
@@ -1603,9 +1596,10 @@ inside the extreme bucket.
 
 Removing the artefact union moves the headline rate from 4.785% to approximately
 4.01%. That is the ceiling on the false-positive correction, and it is materially
-larger than the 6.1% this section reached from sampling alone. The direct counts
-found more than the sample did, which is the expected direction and the reason
-they were run.
+larger than the three sampling-found classes reach on their own: 11,846 scale
+changes, 9,725 IAS 29 re-presentations and ~4,420 precision re-reports total
+25,991 rows, or 6.09% of the population. The direct counts found more than the
+sample did, which is the expected direction and the reason they were run.
 
 The headline finding survives. A 16% correction leaves a restatement rate near
 4%, still low single digits, still the shape the design predicted. Nothing like
@@ -1618,7 +1612,7 @@ distribution in §2.2 does not survive unqualified. The mass above 90% is
 substantially re-presentation rather than correction, and §2.2 is written
 accordingly.
 
-**What verification did not cover.** Nothing was checked against the original
+What verification did not cover. Nothing was checked against the original
 filings on EDGAR. All inspection was against the loaded data, so a sequence that
 is internally coherent may still misrepresent what the filer submitted. Twenty is
 a small sample against 426,706 and supports classification of failure modes
@@ -1631,7 +1625,7 @@ structural limit rather than a sampling one.
 
 ### 2.8 Limitations
 
-**The rounding threshold is a judgement call.** 0.001 was chosen to match §1.10's
+The rounding threshold is a judgement call. 0.001 was chosen to match §1.10's
 balance sheet bound, not derived from the revision distribution. Unlike §1.10,
 where the gap distribution was bimodal and 0.1% sat in the natural break, the
 revision distribution has no such break, it decays smoothly through the small
@@ -1655,8 +1649,8 @@ still 5.49%. What the threshold does not do is separate the classes §2.7 found:
 scale changes and split re-presentations sit far above any plausible bound and no
 choice of threshold removes them.
 
-**Restatement detection cannot distinguish a correction from a reclassification or
-a taxonomy change.** This is the structural limit of the method and it is not
+Restatement detection cannot distinguish a correction from a reclassification
+or a taxonomy change. This is the structural limit of the method and it is not
 fixable by tuning. `int_restatements` observes that a filer published a different
 number for the same described fact; it cannot observe *why*. Four distinct events
 are indistinguishable in the values alone:
@@ -1664,7 +1658,7 @@ are indistinguishable in the values alone:
 - a genuine error correction
 - a reclassification between line items, where a figure moves from one tag to
   another and both change without anything economic having happened
-- a retroactive re-presentation reverse splits (§2.7), IAS 29 hyperinflation
+- a retroactive re-presentation: reverse splits (§2.7), IAS 29 hyperinflation
   restatement (§2.7), discontinued operations reclassified out of continuing
   operations, or a change in accounting policy applied to prior periods
 - a change in reported scale or precision (§2.7)
@@ -1679,7 +1673,7 @@ counted anywhere in this report, and there is no reason to think it is small. **
 this dataset should be read as "the published value for this fact changed", not as
 "the filer got it wrong".** Every use of the word in §2 carries that meaning.
 
-**Twelve quarters is a short window and it biases the rate downward.** The loaded
+Twelve quarters is a short window and it biases the rate downward. The loaded
 range is 2023 Q1 to 2025 Q4. A revision arriving after 2025-12-31 is invisible, and
 since the median revision arrives 364 days after first publication, that censoring
 is severe at the end of the window. The effect is directly measurable:
@@ -1695,7 +1689,7 @@ Facts first published in 2023 had up to three years of observation and restate a
 than half. The same effect appears in the denominator: 52% of facts first reported
 in 2024 were ever reported again, against only 15% of those first reported in 2025.
 
-**The 4.785% headline is therefore a lower bound.** The best-observed cohort
+The 4.785% headline is therefore a lower bound. The best-observed cohort
 restates at 5.35%, and even that is censored, since a 2023 figure can still be
 revised in 2026. Loading the SEC's full history from 2009 Q2 would raise the rate;
 this analysis cannot say by how much.
@@ -1704,7 +1698,7 @@ Left-censoring bites at the other end and is why §2.4 discards its first four
 quarters: a revision published in 2023 Q1 has no original in the window to be a
 revision *of*.
 
-**Further limits, stated briefly.**
+Further limits:
 
 - **The 154 conflicting-duplicate groups from §1.6 are handled, not solved.** Where
   one filing carries two values under one composite key, `int_restatements`
@@ -1780,14 +1774,14 @@ a large accelerated filer's 10-K, 67 for an accelerated, 87 for a
 non-accelerated, and 34 / 38 / 44 for the corresponding 10-Qs. The gradient with
 filer size is §1.2's finding and stands.
 
-**What is new is the second wait.** §1.2 could only measure each filing against
+What is new is the second wait. §1.2 could only measure each filing against
 its own period. It observed that a 10-K/A arrives at a median of 207 days
 against 67 for a 10-K and inferred a gap of "roughly 140 days" by subtracting
 one median from the other. `fil_lag_by_form` pairs each amendment to the
 specific original it amends, same company, same base form, same period, the
 last one filed on or before it, and measures the gap directly.
 
-**The direct measurement is 98 days, not 140.** Over the 1,438 amendments that
+The direct measurement is 98 days, not 140. Over the 1,438 amendments that
 have an original inside the loaded range:
 
 | | Days from original to amendment |
@@ -1805,7 +1799,7 @@ before 2023-01-03, which are outside the loaded range and inflate the amendment
 lag without contributing a matching original. Pairing removes them from both
 sides at once.
 
-**98 is itself a lower bound, and the direction is knowable.** The 411
+98 is itself a lower bound, and the direction is knowable. The 411
 amendments (22.2%) with no original in range are excluded, and they are excluded
 precisely *because* their original was filed before 2023-01-03, that is, they
 are the amendments with the longest gaps. Left-censoring therefore trims the
@@ -1836,7 +1830,7 @@ is not a single axis of promptness. *Root cause: not established.* A larger
 filer's amendment plausibly requires more audit work, but nothing here tests
 that.
 
-**How often a form gets amended at all**, attributed to the original rather than
+How often a form gets amended at all, attributed to the original rather than
 the amendment:
 
 | Form | Filer status | Originals | Observed amended | % |
@@ -1856,7 +1850,7 @@ the disagreement is the point: amendment rate tracks data quality, restatement
 rate does not, because most restatements never appear in an amendment (§2, "One
 result organises the rest").
 
-**The filer's own amendment flag undercounts by half.** The SEC's `prevrpt` flag
+The filer's own amendment flag undercounts by half. The SEC's `prevrpt` flag
 marks an original whose filer indicated it was superseded. Across the 69,907
 originals, 842 (1.20%) carry the flag but 1,309 (1.87%) have an amendment
 actually present in the loaded range. Both counts ship, because the disagreement
@@ -1870,7 +1864,7 @@ indicator on its own.
 
 ### 3.2 Has the wait moved across the twelve quarters?
 
-**No, and the sample cannot support a finer answer than that.**
+No, and the sample cannot support a finer answer than that.
 
 `fil_lag_trend` fits a straight line to each form-and-status series over the
 twelve filing quarters, and reports the r-squared of the same fit and the
@@ -1885,15 +1879,15 @@ residual spread beside the slope. All six series:
 | 10-Q | Accelerated | −0.056 | −0.22 | 0.269 | 0.39 | no trend |
 | 10-Q | Non-accelerated | +0.037 | +0.15 | 0.031 | 0.75 | no trend |
 
-**The judgement call, declared:** a straight line through twelve seasonal points
-is treated as describing the series only where it accounts for at least half the
-variation (r² ≥ 0.5). No series reaches it. The highest is 0.269, and that one , 
-10-Q accelerated, has a series standard deviation of 0.39 days, so the line is
-fitted to a series that barely moves at all. The largest annual drift any series
-supports is under one day per year, against a median lag of 34 to 87 days.
+A straight line through twelve seasonal points is treated as describing the
+series only where it accounts for at least half the variation (r² ≥ 0.5). No
+series reaches it. The highest is 0.269, and that one, 10-Q accelerated, has a
+series standard deviation of 0.39 days, so the line is fitted to a series that
+barely moves at all. The largest annual drift any series supports is under one
+day per year, against a median lag of 34 to 87 days.
 
-**Seasonality is the reason, and it is an order of magnitude larger than any
-trend.** 10-K non-accelerated filers have a median lag of 80 days on filings
+Seasonality is the reason, and it is an order of magnitude larger than any
+trend. 10-K non-accelerated filers have a median lag of 80 days on filings
 made in Q1 and 107 on filings made in Q2, a 27-day swing inside one year,
 against a series standard deviation of 8.68 and a fitted slope of exactly zero.
 The Q1 10-Ks are calendar-year filers near their deadline; the Q2 10-Ks are the
@@ -1908,18 +1902,17 @@ almost entirely absent from the loaded range, so the last quarters would show a
 spuriously short lag drawn from the early filers alone. On a filing axis,
 2023Q1 through 2025Q4 are twelve complete quarters.
 
-**The sample-size caveat, stated plainly.** Twelve points per series is a short
-series, and the points are not equally weighted. The 10-K series are dominated
-by one quarter each year: 1,809 large accelerated 10-Ks were filed in 2023Q1
-against 93 in 2023Q2. The accelerated 10-K series thins to 36 filings in 2023Q3
-and 38 in 2025Q4, and the 10-Q large accelerated series to 325 in 2024Q1. A
-median computed on 36 filings carries several days of sampling error on its own,
-which is comparable to the entire fitted movement across three years. Four
-quarters of each series additionally have no trailing comparison at all, because
-a full cycle has not yet accrued; those rows carry
-`has_full_trailing_window = false` and are flagged rather than dropped, so the
-early quarters keep their own medians and only the derived comparison is marked
-incomplete.
+Twelve points per series is a short series, and the points are not equally
+weighted. The 10-K series are dominated by one quarter each year: 1,809 large
+accelerated 10-Ks were filed in 2023Q1 against 93 in 2023Q2. The accelerated
+10-K series thins to 36 filings in 2023Q3 and 38 in 2025Q4, and the 10-Q large
+accelerated series to 325 in 2024Q1. A median computed on 36 filings carries
+several days of sampling error on its own, which is comparable to the entire
+fitted movement across three years. Four quarters of each series additionally
+have no trailing comparison at all, because a full cycle has not yet accrued;
+those rows carry `has_full_trailing_window = false` and are flagged rather
+than dropped, so the early quarters keep their own medians and only the
+derived comparison is marked incomplete.
 
 What this section establishes is a negative: **filing promptness in this data is
 a stable seasonal pattern with no detectable drift over twelve quarters.** It
@@ -1941,7 +1934,7 @@ descending filer size, and 40 / 40 / 45 for a 10-Q. Rule 0-3(a) rolls a due date
 falling on a weekend to the next business day, which the model applies. Federal
 holidays are not modelled; §3.5 measures what that costs.
 
-**The margin threshold is derived, not chosen.** A filing is treated as made to
+The margin threshold is derived, not chosen. A filing is treated as made to
 the deadline if it lands within one day of its due date. Across the observed
 distribution of margins, filings land on the due date itself at **20.1%** of the
 −3..+14 day window and on the following day at **10.8%**, against a flat plateau
@@ -1958,7 +1951,7 @@ a band around zero.
 Across 7,264 companies and 69,907 filings, 25,782 filings (36.88%) were made at
 the deadline.
 
-**The consecutive-run distinction is what the model exists to draw.** A count
+The consecutive-run distinction is what the model exists to draw. A count
 alone cannot separate a company that habitually files at the wire from one that
 had two bad quarters and filed early the rest of the time. Runs of consecutive
 deadline filings are found by gap and island over each company's own filing
@@ -1981,7 +1974,7 @@ covering catch-up filings), episodic ones repeat the behaviour in separate burst
 with early filings between, and intermittent ones never string three together at
 all.
 
-**Habitual is not one behaviour.** Of the 2,862 habitual companies, 1,439 have a
+Habitual is not one behaviour. Of the 2,862 habitual companies, 1,439 have a
 median margin of 0 or 1 day, genuinely disciplined to the wire, and 794 have a
 negative median, meaning their typical filing is late. 900 are habitual and have
 never filed late once. These are opposite phenomena sharing a label, and §3.5
@@ -2031,22 +2024,20 @@ loaded range afterwards in which to revise. Metrics are net margin and
 year-on-year revenue growth. Peers are SIC major groups with at least 20
 companies. The fiscal period is fixed once from the point-in-time view and both
 sides are pinned to it, so a restatement is never compared against a newer
-annual period. The population is held to companies present in **both** views , 
+annual period. The population is held to companies present in **both** views,
 3,441 companies across 35 SIC groups, because a company absent from one side
 would shift every peer's rank on the other and be counted as a change it did not
 cause.
-
-**The result.**
 
 | | Companies | % of 3,441 |
 |---|---|---|
 | At least one input value changed between views | 323 | 9.39 |
 | **Changed quartile on margin or growth** | **264** | **7.67** |
 | **Changed quartile materially** | **103** | **2.99** |
-|, margin | 116 changed / 42 material | |
-|, growth | 167 changed / 75 material | |
+| by metric: margin | 116 changed / 42 material | |
+| by metric: growth | 167 changed / 75 material | |
 
-**The argument, explicitly.** A screen, a benchmark or a back-test that ranks
+Stated as an argument: a screen, a benchmark or a back-test that ranks
 companies on their FY2023 numbers using data pulled today is not reproducing
 what an analyst could have seen in mid-2024. It is ranking them on figures that
 did not exist then, against peers classified into industries they had not yet
@@ -2068,7 +2059,7 @@ One quartile is not the ceiling. **42 of the 103 moved two or more quartiles and
 | +3 | 2 | 2 | | +2 | 15 | 15 |
 | | | | | +3 | 4 | 4 |
 
-**Materiality is a derived bound, not a chosen one.** A quartile change is called
+Materiality is a derived bound, not a chosen one. A quartile change is called
 material only where the company's rank within its peer group also moved by at
 least 0.05. The bound comes from the observed separation between the two
 mechanisms that move a bucket: where the company's own inputs were restated, the
@@ -2079,8 +2070,8 @@ bucket when four peers join its SIC group without anything about it changing.
 Counting those alongside a genuine reordering would overstate the headline by
 roughly half, 264 against 103.
 
-**Why the bucket moved.** The model attributes every change, and the attribution
-is the most useful column in it:
+The model attributes every change, and that attribution is the most useful
+column in it:
 
 | Attribution | Companies | Material | Mean abs. margin shift |
 |---|---|---|---|
@@ -2092,8 +2083,8 @@ is the most useful column in it:
 
 Two findings sit in that table.
 
-**First, reclassification is nearly as destructive as restatement and is far
-less expected.** Only 19 companies changed SIC major group, but 18 of the 19
+First, reclassification is nearly as destructive as restatement and is far
+less expected. Only 19 companies changed SIC major group, but 18 of the 19
 changed quartile materially, a 95% hit rate, against 84% for restatement. The
 reason is mechanical: a restatement moves one company within a fixed
 distribution, while a reclassification moves it into a different distribution
@@ -2106,8 +2097,8 @@ A peer screen of FY2023 software companies run today omits them; a screen run in
 mid-2024 included them. Neither is wrong about its own date. They are answers to
 different questions, and only one of them is the question a back-test is asking.
 
-**Second, 150 companies changed quartile without anything about them changing at
-all.** Their own values held, their SIC held, and their peers' restatements moved
+Second, 150 companies changed quartile without anything about them changing at
+all. Their own values held, their SIC held, and their peers' restatements moved
 the distribution underneath them. Only 4 of the 150 clear the materiality bound,
 so this is a small effect on the headline, but it is the case most easily
 mistaken for stability: a company can be a perfectly faithful record of itself
@@ -2138,7 +2129,7 @@ classes that were then counted across the population. The same skepticism is
 applied here, and it finds two real problems: one in §3.3 that halves a headline,
 and one in §3.4 that removes seven cases from another.
 
-**The point-in-time view reproduces exactly.** The visibility rule was
+The point-in-time view reproduces exactly. The visibility rule was
 recomputed independently of the model, a `distinct on` over `fct_financial_fact`
 filtered to `filed_date < 2024-06-30`, written from the specification rather than
 from the model code, and compared row by row against `pit_net_income` for all
@@ -2147,7 +2138,7 @@ cutoff reaches the point-in-time view. This is the one thing in §3.4 that had t
 be exactly right, since every number in the section is a difference between the
 two views, and it is.
 
-**Deadline calculations: spot-checked against known filings, and they hold.**
+Deadline calculations: spot-checked against known filings, and they hold.
 Six filings were checked by hand against the statutory rule and the calendar:
 
 | Company | Form | Period end | Filed | Lag | Deadline | Margin |
@@ -2169,8 +2160,8 @@ most negative median margins belong to Nutra Pharma, Party City, Avaya,
 Veradigm, Latch, TuSimple and similar, delinquent filers and Chapter 11 cases
 catching up on years of missed reports, not calculation errors.
 
-**But the late rate is roughly half an artefact, and §3.3's flag does not know
-it.** The model reads 8,371 filings (11.97%) as late. That is high against the
+But the late rate is roughly half an artefact, and §3.3's flag does not know
+it. The model reads 8,371 filings (11.97%) as late. That is high against the
 real-world rate, so it was checked, and the check found the exception the rules
 carry:
 
@@ -2187,7 +2178,7 @@ and 326 at day 107, which is day 90 plus the 15-day extension.
 | Of which, inside the Rule 12b-25 window | 3,856 | 5.51 |
 | **Late after the extension** | **4,515** | **6.46** |
 
-**46% of the filings §3.3 reads as late were probably not late.** The correct
+46% of the filings §3.3 reads as late were probably not late. The correct
 statement is a range, not a number: 6.46% is a lower bound and 11.97% an upper
 bound, and the dataset cannot narrow it, because Form 12b-25 (NT 10-K / NT 10-Q)
 carries no XBRL financial data and so does not appear in the SEC Financial
@@ -2195,7 +2186,7 @@ Statement Data Sets at all. There are no NT forms in `dim_filing` to join to.
 Filing inside the window is necessary but not sufficient evidence that the
 extension was invoked.
 
-**Federal holidays cost about 290 more.** The model rolls weekend due dates and
+Federal holidays cost about 290 more. The model rolls weekend due dates and
 states that it does not model holidays, calling the effect small and one-sided.
 That is checkable and the model is right, though the effect is more concentrated
 than "small" suggests. Of 913 filings flagged exactly one day late, **236 share
@@ -2205,7 +2196,7 @@ flags, 3.5% of all of them, are holiday artefacts, and 236 of those come from
 one date. `dim_date` carries no holiday flag, so the fix is a dimension change
 rather than a model change, and it is not made here.
 
-**The tightest decile is not what its label implies.** `fil_deadline_filers`
+The tightest decile is not what its label implies. `fil_deadline_filers`
 ranks companies by median margin ascending and calls decile 1 the tightest
 margin. Checking its composition: **all 642 companies in decile 1 have a
 negative median margin.** Not one of them files on the wire; every one of them
@@ -2218,7 +2209,7 @@ does not belong. The ranking is retained as shipped, with this caveat, rather
 than silently re-cut; a consumer wanting deadline discipline should filter on
 `n_late_filings = 0` first, which leaves 900 habitual companies.
 
-**Seven of §3.4's 103 material changes are artefacts, not restatements.** The
+Seven of §3.4's 103 material changes are artefacts, not restatements. The
 same skepticism §2.7 applied to restatements applies to the values feeding this
 comparison, and two classes turn up.
 
@@ -2257,7 +2248,7 @@ structural rather than reassuring: §3.4 operates on four tags at consolidated
 level in USD, which excludes most of the classes §2.7 found, no share counts, so
 no reverse splits; no foreign currency, so no IAS 29 re-presentation.
 
-**A defect in the attribution column that does not reach the headline.**
+A defect in the attribution column that does not reach the headline.
 `own_values_changed` tests the three input values with `is distinct from`, which
 has no tolerance. 39 of the 323 companies it flags have all three inputs agreeing
 to within 0.1%, QXO's revenue is $54,516,941 in one view and $54,517,000 in the
@@ -2267,7 +2258,7 @@ the 103 material changes, so the headline is unaffected, but the attribution
 column overstates restatement by roughly 12% of its own count. §2's 0.001
 rounding threshold should be applied here and is not.
 
-**What verification did not cover.** Values were checked against the loaded data,
+What verification did not cover. Values were checked against the loaded data,
 never against source filings on EDGAR. Peer group construction was not
 independently reproduced, only the visibility rule feeding it. The margin
 threshold in §3.3 and the materiality bound in §3.4 were both derived from
@@ -2280,12 +2271,12 @@ require data outside the loaded range.
 
 ### 3.6 Limitations
 
-**§3.3's late-filing rate is a range, not a number.** 6.46% to 11.97%, and the
+§3.3's late-filing rate is a range, not a number. 6.46% to 11.97%, and the
 dataset cannot narrow it because Form 12b-25 carries no XBRL and is absent from
 the source. Every count in §3.3 derived from `is_late_filing` inherits this,
 including the 794 habitually-late companies and the composition of decile 1.
 
-**Three deadline exceptions beyond 12b-25 are not modelled.** Federal holidays
+Three deadline exceptions beyond 12b-25 are not modelled. Federal holidays
 (~290 filings, measured in §3.5). Newly public companies, whose first 10-Q is due
 45 days after the registration statement's effective date rather than 45 days
 after period end, and whose first 10-K is due 90 days regardless of the size
@@ -2294,37 +2285,37 @@ registration data this project does not load. Transition-period reports: 41
 10-KTs exist in `dim_filing` and are excluded from §3.3 entirely rather than
 given a deadline the rules do not define for them.
 
-**Filer status is taken as filed and is not verified.** The 60/75/90 assignment
+Filer status is taken as filed and is not verified. The 60/75/90 assignment
 rests entirely on the SEC's `afs` field as the filer reported it. A company that
 misreports its own accelerated-filer status is measured against the wrong
 deadline, and nothing here detects that. `3-SRA` and `5-SML` do not occur in the
 loaded range, so the model's `else` branch resolves only genuine non-accelerated
 filers, but that is an observation about this data rather than a guarantee.
 
-**§3.4 rests on four tags and one cutoff date.** Revenue under three tags plus
+§3.4 rests on four tags and one cutoff date. Revenue under three tags plus
 `NetIncomeLoss`, consolidated, USD, `qtrs = 4`. A company reporting revenue under
 a fourth tag, in a foreign currency, or only at segment level is absent from the
 population. The 2024-06-30 cutoff is a single point: the 103 is what eighteen
 months of subsequent filings did to one fiscal year viewed from one date, and a
-different cutoff would produce a different count. The direction is predictable , 
+different cutoff would produce a different count. The direction is predictable:
 an earlier cutoff sees fewer filings and would find more change, but the
 magnitude is not established, and no sensitivity across cutoffs was run.
 
-**The two-view comparison inherits everything §2.8 says about restatements.**
+The two-view comparison inherits everything §2.8 says about restatements.
 `pit_peer_comparables` observes that the best-known value changed; it cannot
 observe why, and the four indistinguishable events §2.8 lists, error correction,
 reclassification between tags, retroactive re-presentation, scale change, are
 equally indistinguishable here. §3.5 removes the two classes that leave a
 signature in these four tags. The general case is unquantified, as it is in §2.
 
-**`dim_company`'s 7% spurious version transitions (§2.8) reach §3.4's SIC
-attribution.** The range join that resolves each company's SIC as of each view's
+`dim_company`'s 7% spurious version transitions (§2.8) reach §3.4's SIC
+attribution. The range join that resolves each company's SIC as of each view's
 date passes through those versions. The effect should be nil, spurious versions
 carry the same SIC as the versions either side, so a major-group assignment is
 unaffected, but the 19 reclassifications were not individually traced through
 the SCD2 to confirm each is a real SIC change rather than a versioning artefact.
 
-**3,441 companies is a fraction of the 8,693 in the warehouse.** The population
+3,441 companies is a fraction of the 8,693 in the warehouse. The population
 is narrowed by the annual period window, the four tags, positive revenue in both
 the target and prior year, presence in both views, and the 20-peer minimum. The
 2.99% material-change rate is a rate over companies that survive all of those
@@ -2332,17 +2323,23 @@ filters, which skew toward larger and more consistently reporting filers. It is
 not a rate over all SEC registrants, and applying it to one would understate the
 effect if anything, since the excluded companies report less consistently.
 
-**§3.2 establishes a negative that a longer series might overturn.** Twelve
+§3.2 establishes a negative that a longer series might overturn. Twelve
 quarters, six series, no slope clearing r² = 0.5. A real drift of under a day per
 year is entirely compatible with these results.
 
-**Nothing in §3 is confirmed against source filings on EDGAR.** As in §1 and §2.
+Nothing in §3 is confirmed against source filings on EDGAR. As in §1 and §2.
 The known-filing checks in §3.5 are against public knowledge of those companies'
 reporting delays, not against the filings themselves.
 
 ---
 
 ## §4 What point-in-time discipline is worth (Stage 4)
+
+**Report date:** 2026-09-01
+**Models:** `feat_filing_base`, `feat_filing_pit`, `feat_filing_naive`
+**Script:** `scripts/train_compare.py`
+**Tests:** `assert_feature_tables_aligned`,
+`assert_pit_features_exclude_future`
 
 ### Scope
 
@@ -2393,8 +2390,8 @@ Features 4 and 5 have a history, and that is where the two tables part:
 
 - **`feat_filing_pit`** admits a revision on the day that revision was
   *published*. Its sector rate is an expanding window over filings of the same
-  SIC major group, as recorded on the `dim_company` version current at filing , 
-  whose own observation window had already closed.
+  SIC major group, as recorded on the `dim_company` version current at filing,
+  and counts only those filings whose own observation window had already closed.
 - **`feat_filing_naive`** computes both over the whole loaded range. Four things
   leak across the two features: the sector is read from the `dim_company`
   version current today, joined on `is_current` rather than range-joined on
@@ -2402,15 +2399,15 @@ Features 4 and 5 have a history, and that is where the two tables part:
   includes the filing being scored; and the prior-restatement count spans every
   one of the company's revised filings, the scored filing included.
 
-**How much of that a working modeller would actually write is hypothesised, not
-established, and no survey was done.** Two of the four are the path of least
+How much of that a working modeller would actually write is hypothesised, not
+established, and no survey was done. Two of the four are the path of least
 resistance, `is_current` is the easy join and a whole-window `group by` is the
 easy aggregate. The `prior_restatement_count` construction is harder to defend
 that way, because the identifier says *prior* and the code does not, and 4.2
 shows it is the one carrying almost all of the effect. The gap should be read as
 what these two specific constructions are worth, which is what 4.5 says as well.
 
-**Nor is a missing date predicate the whole of the difference**, though it is the
+Nor is a missing date predicate the whole of the difference, though it is the
 largest part of it. Adding `filed_date <` the scored filing's date to the sector
 rate would fix two of the four and still be wrong: it would put filings still
 inside their own observation window into the denominator as clean ones.
@@ -2441,7 +2438,7 @@ quarter, at the cost of dropping filings within one horizon of the end of the
 range. The residual seasonality, Q1 filings restate more, because they are
 annual reports, is real and is present in both splits.
 
-**180 days is a judgement call, and it is the only one that matters here.** §4.3
+180 days is a judgement call, and it is the only one that matters here. §4.3
 rebuilds the whole comparison at five horizons and finds the gap does not turn on
 it. A second materiality bound was tested and abandoned: requiring the revision to
 exceed five percent of the original value moves the positive rate from 11.44% to
@@ -2464,7 +2461,7 @@ financials the label is meant to name.
 | | naive | 0.7407 | **0.7218** |
 | | **gap** | 0.0803 | **0.1116** |
 
-**Between 0.11 and 0.13 of test AUC is information from after the filing date.**
+Between 0.11 and 0.13 of test AUC is information from after the filing date.
 Stated as a range rather than a number, for the reason 4.2 gives.
 
 Read against the scale: the point-in-time model is 0.59–0.61, which is weak but
@@ -2488,7 +2485,7 @@ fitted, alongside its fitted coefficient on standardised inputs:
 | `prior_restatement_count` | −0.0058 | 0.5669 | **0.5781** | **0.7180** |
 | `sector_restatement_rate` | −0.2025 | 0.5526 | 0.1786 | 0.5562 |
 
-**The leak is almost entirely one feature.** `prior_restatement_count` computed
+The leak is almost entirely one feature. `prior_restatement_count` computed
 over the full window scores 0.7180 on its own, higher than the entire fitted
 naive model, and it carries by far the largest coefficient in it. The same
 feature computed point-in-time scores 0.5669 and the model gives it a coefficient
@@ -2506,12 +2503,12 @@ filings made after this one, and it groups on the filer's present-day SIC:
 1,330 filings by 268 companies sit in a different SIC major group under the two
 readings, so those filings are scored against peers they had not yet joined.
 
-**The point-in-time sector rate has a warm-up problem, and it is honest to say
-so.** The gap is quoted as a range because the point-in-time model is handicapped
-by something other than the leak. For the first months of the loaded range the
-sector rate has no resolved history to read and correctly falls back to a
-whole-market rate that is itself near zero, while those early filings are annual
-reports and restate more than average:
+The point-in-time sector rate has a warm-up problem. The gap is quoted as a
+range because the point-in-time model is handicapped by something other than
+the leak. For the first months of the loaded range the sector rate has no
+resolved history to read and correctly falls back to a whole-market rate that
+is itself near zero, while those early filings are annual reports and restate
+more than average:
 
 | PIT sector rate quintile | Train label rate | Test label rate |
 |---|---|---|
@@ -2536,9 +2533,9 @@ test population is the same in every row of 4.1. The point-in-time model gains
 ### 4.3 Does the gap depend on the horizon?
 
 180 days is a judgement call, so the whole comparison was rebuilt at five
-horizons. Only the var changes; the population, the label, both feature tables
-and the two singular tests all follow from it. All 21 tests pass at every
-horizon.
+horizons. Only `restatement_label_horizon_days` changes; the population, the
+label, both feature tables and the two singular tests all follow from it.
+All 21 tests pass at every horizon.
 
 | Horizon | Test filings | Test window | Test positive | PIT test AUC | Naive test AUC | Gap |
 |---|---|---|---|---|---|---|
@@ -2554,12 +2551,12 @@ Same, with warm-up rows dropped from both models' training sets:
 |---|---|---|---|---|---|
 | Gap | 0.0952 | 0.1087 | 0.1116 | 0.1090 | 0.1457 |
 
-**The gap does not turn on the horizon.** Across 90 to 240 days it sits between
+The gap does not turn on the horizon. Across 90 to 240 days it sits between
 0.115 and 0.130 on all training rows, and between 0.095 and 0.112 with warm-up
 dropped, a spread narrower than the correction for the warm-up artefact itself.
 The headline range quoted in 4.1 is not an artefact of choosing 180.
 
-**The 270-day row is reported and discounted.** Its gap is the largest in the
+The 270-day row is reported and discounted. Its gap is the largest in the
 table, but its test set is 5,277 filings ending 2025-04-04, a single quarter,
 and the annual-report quarter at that, with a 23.69% positive rate against
 13.51% at 180. The point-in-time model is the half that moves (0.5600, the
@@ -2567,15 +2564,15 @@ lowest anywhere in the table) while the naive model holds up, which is what a
 small single-season test set does to the weaker of two models. It is one point
 on five, and no trend is claimed from it.
 
-**The horizon and the seasonal mix cannot be separated here, and that limits what
-this table establishes.** A longer horizon eats the test set from the front, so
+The horizon and the seasonal mix cannot be separated here, and that limits what
+this table establishes. A longer horizon eats the test set from the front, so
 the surviving test window is not just shorter but earlier and progressively more
 Q1-heavy, 90 days leaves three quarters of 2025, 270 leaves one. Test positive
 rate rises monotonically down the table for that reason as much as for the longer
 observation window. The stability of the gap across the first four rows is
 therefore stronger evidence than any reading of its slope.
 
-**The leak stays in the same place at every horizon.** `prior_restatement_count`
+The leak stays in the same place at every horizon. `prior_restatement_count`
 computed over the full window scores, alone, within a few points of the entire
 fitted naive model at all five:
 
@@ -2592,7 +2589,7 @@ between the two readings is what does not move.
 
 ### 4.4 Verification
 
-**The two tables are provably the same experiment.**
+The two tables are provably the same experiment.
 `assert_feature_tables_aligned` full-outer-joins them on `adsh` and fails on any
 filing present in one and not the other, or labelled differently between them.
 It passes: 58,726 rows either side, zero label disagreements. Without that, the
@@ -2601,7 +2598,7 @@ artefact of the population. `scripts/train_compare.py` re-checks the same
 invariant in Python before fitting anything, and raises rather than reporting a
 number it cannot defend.
 
-**The point-in-time features were recomputed the slow, obvious way.** Both are
+The point-in-time features were recomputed the slow, obvious way. Both are
 built by a running sum over a sorted union of query rows and event rows, which is
 one sort instead of 58,726 lateral lookups but is not obviously correct by
 inspection, the strictly-prior semantics rest entirely on query rows sorting
@@ -2620,19 +2617,19 @@ with the same null test the rate already used. The 4.1 figures are post-fix; the
 pre-fix warm-up regime trained on 35,076 rows rather than 34,156 and reported a
 gap of 0.1115 against 0.1116.
 
-**`prior_restatement_count` was exact on all 58,726 rows in both the failing and
-passing runs.** The single feature carrying the leak has been independently
+`prior_restatement_count` was exact on all 58,726 rows in both the failing and
+passing runs. The single feature carrying the leak has been independently
 recomputed and agrees.
 
-**The comparison is deterministic.** `lbfgs` on fixed inputs with no sampling
+The comparison is deterministic. `lbfgs` on fixed inputs with no sampling
 step; two consecutive runs of `train_compare.py` produce byte-identical output.
 
-**No pandas.** Rows come out of Postgres into numpy arrays. Every aggregation in
+No pandas. Rows come out of Postgres into numpy arrays. Every aggregation in
 this section is SQL.
 
 ### 4.5 Limitations
 
-**The model is bad, and that is the design, but it does constrain the reading.**
+The model is bad, and that is the design, but it does constrain the reading.
 Five crude features and an unregularised linear fit. The fitted point-in-time
 model scores *below* `filing_lag_days` used alone (0.5894–0.6102 against 0.6981),
 because filing lag is correlated with filer status and the linear fit spreads one
@@ -2640,13 +2637,13 @@ signal across collinear columns while the sector confound pulls in the wrong
 direction. A gap measured between two better models would not be this gap. The
 direction is not in doubt; the magnitude is specific to this model.
 
-**The gap is a property of these two constructions, not of leakage in general.**
+The gap is a property of these two constructions, not of leakage in general.
 `feat_filing_naive` is one plausible naive table. A modeller who computed the
 prior-restatement count with a date predicate but got the sector rate wrong would
 leak far less; one who added more full-window aggregates would leak more. 0.11 to
 0.13 is what these five features are worth, not a constant.
 
-**The test period is six months.** 2025-01-02 to 2025-07-03, the whole of the
+The test period is six months. 2025-01-02 to 2025-07-03, the whole of the
 loaded range that has both a complete 180-day observation window and a filing
 date after the training cutoff. It contains one annual-report season, and Q1 is
 the highest-restatement quarter. A test set spanning a full year would weight the
@@ -2654,25 +2651,25 @@ seasonal mix differently. §4.3's sweep cannot fix this and partly inherits it:
 horizon and seasonal mix move together, because a longer horizon leaves a shorter
 and more Q1-heavy test window.
 
-**The warm-up defect would shrink with more history and cannot be removed here.**
+The warm-up defect would shrink with more history and cannot be removed here.
 It exists because the loaded range starts 2023Q1 and the sector rate needs
 resolved filings before it says anything. Loading 2019–2022 would push the warm-up
 entirely outside the training window. The second training regime bounds the
 effect rather than eliminating it.
 
-**Right-censoring is handled by exclusion, not by modelling.** Filings within 180
+Right-censoring is handled by exclusion, not by modelling. Filings within 180
 days of the end of the range are dropped rather than treated as censored
 observations. That is the correct simple choice, and it is not free.
 A survival model would use them; this is not a survival model. 11,230 of the
 69,956 10-K and 10-Q filings in the loaded range are dropped this way, all of
 them from the second half of 2025.
 
-**The label inherits everything §2.8 says about restatements.** It is built on
+The label inherits everything §2.8 says about restatements. It is built on
 `int_restatements`, which observes that a value changed and cannot observe why.
 Error correction, reclassification between tags, retroactive re-presentation and
 scale change are equally indistinguishable here, and no attempt is made to
 separate them. A filing labelled restated is a filing whose consolidated figure
 moved, nothing more.
 
-**Nothing here is confirmed against source filings on EDGAR.** As in §1, §2
+Nothing here is confirmed against source filings on EDGAR. As in §1, §2
 and §3.
